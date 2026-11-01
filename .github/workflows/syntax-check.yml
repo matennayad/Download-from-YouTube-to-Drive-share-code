@@ -1,0 +1,35 @@
+name: Syntax check
+
+# בדיקות תחביר מהירות בכל דחיפה ל-main: פייתון לקבצי השרת,
+# node --check לקבצי Apps Script. עוצר דחיפות שבורות לפני ש-Railway
+# יבנה גרסה לא תקינה (אין פייתון/נודה יציבים במחשב המקומי).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Python syntax check (server + bots)
+        run: |
+          cd download-service && python3 -m py_compile app.py telegram_bot.py telegram_songs_to_drive.py drive_bridge.py && cd ../search-service && python3 -m py_compile app.py
+          echo "Python OK"
+
+      - name: Apps Script syntax check
+        run: |
+          node --check "apps-script/unified-search/קוד.js"
+          node --check "apps-script/youtube-search/קוד.js"
+          # node --check לא מקבל סיומת .gs — מעתיקים ל-.js זמני
+          mkdir -p /tmp/gscheck
+          cp apps-script/downloads/Code.gs /tmp/gscheck/Code.js
+          cp apps-script/downloads/channels.gs /tmp/gscheck/channels.js
+          node --check /tmp/gscheck/Code.js
+          node --check /tmp/gscheck/channels.js
+          echo "Apps Script OK"

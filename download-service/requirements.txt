@@ -1,0 +1,14 @@
+Flask
+# [default] מביא את yt-dlp-ejs - סקריפטי פתרון אתגרי ה-JS של יוטיוב
+yt-dlp[default]
+requests
+pysocks
+google-api-python-client
+google-auth
+google-auth-httplib2
+google-auth-oauthlib
+curl_cffi
+pycryptodome
+# טלגרם MTProto - לדימון שירים לדרייב (telegram_songs_to_drive.py)
+telethon
+cryptg

@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>מדריך הקמה — הורדות לדרייב</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f7fb; --surface:#ffffff; --surface-2:#f0f2f8; --border:#e2e5ef;
+  --text:#1b1e2b; --muted:#5d6377; --faint:#8a90a4;
+  --accent:#3b5bfd; --accent-2:#7b4dff; --accent-soft:#e8edff;
+  --ok:#14945a; --ok-soft:#e3f6ec; --warn:#b26a00; --warn-soft:#fff3dc; --bad:#c62f3a; --bad-soft:#fde8ea;
+  --code-bg:#151827; --code-text:#e6e8f2; --code-val:#ffd166; --code-cmt:#7f86a3;
+  --shadow:0 1px 2px rgba(20,24,40,.06),0 6px 20px rgba(20,24,40,.06);
+  --mock-bg:#ffffff; --mock-line:#d9dce7; --mock-fill:#f3f4f8; --mock-text:#30344a;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f111a; --surface:#171a26; --surface-2:#1f2333; --border:#2a2f42;
+    --text:#e9ebf3; --muted:#a3a9bd; --faint:#767d95;
+    --accent:#7b93ff; --accent-2:#a98bff; --accent-soft:#232a4a;
+    --ok:#3ccf8e; --ok-soft:#15302a; --warn:#ffb547; --warn-soft:#33270f; --bad:#ff6b76; --bad-soft:#3a1a1f;
+    --code-bg:#0b0d15; --code-text:#e6e8f2; --code-val:#ffd166; --code-cmt:#6f7694;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+    --mock-bg:#1d2130; --mock-line:#343a52; --mock-fill:#262b3d; --mock-text:#dfe2ee;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f111a; --surface:#171a26; --surface-2:#1f2333; --border:#2a2f42;
+  --text:#e9ebf3; --muted:#a3a9bd; --faint:#767d95;
+  --accent:#7b93ff; --accent-2:#a98bff; --accent-soft:#232a4a;
+  --ok:#3ccf8e; --ok-soft:#15302a; --warn:#ffb547; --warn-soft:#33270f; --bad:#ff6b76; --bad-soft:#3a1a1f;
+  --code-bg:#0b0d15; --code-text:#e6e8f2; --code-val:#ffd166; --code-cmt:#6f7694;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  --mock-bg:#1d2130; --mock-line:#343a52; --mock-fill:#262b3d; --mock-text:#dfe2ee;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Heebo,"Segoe UI",Arial,sans-serif;font-size:16px;line-height:1.7}
+a{color:var(--accent)}
+code,kbd,.mono{font-family:"JetBrains Mono",Consolas,monospace;font-size:.88em}
+:not(pre)>code{background:var(--surface-2);border:1px solid var(--border);padding:1px 6px;border-radius:6px;direction:ltr;unicode-bidi:isolate;overflow-wrap:anywhere}
+
+/* top bar */
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;padding:10px 16px;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.topbar .brand{font-weight:800;display:flex;align-items:center;gap:8px}
+.logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;color:#fff;font-size:15px}
+.progress{flex:1;height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden;max-width:360px;margin-inline-start:auto}
+.progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .3s}
+.ptext{font-size:13px;color:var(--muted);min-width:64px;text-align:center}
+.iconbtn{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:10px;padding:6px 10px;cursor:pointer;font:inherit;font-size:14px}
+.iconbtn:hover{border-color:var(--accent)}
+#menuBtn{display:none}
+
+/* layout */
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:28px;max-width:1180px;margin:0 auto;padding:24px 16px 80px}
+nav.toc{position:sticky;top:72px;align-self:start;max-height:calc(100vh - 90px);overflow:auto;padding:4px}
+nav.toc a{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:10px;color:var(--muted);text-decoration:none;font-size:14.5px}
+nav.toc a:hover{background:var(--surface-2);color:var(--text)}
+nav.toc a.active{background:var(--accent-soft);color:var(--accent);font-weight:700}
+nav.toc .num{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);font-size:12px;font-weight:700;flex:none}
+nav.toc a.done .num{background:var(--ok);color:#fff}
+nav.toc .sep{margin:12px 10px 6px;font-size:12px;color:var(--faint);font-weight:700;letter-spacing:.5px}
+
+main{min-width:0}
+.hero{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;border-radius:22px;padding:34px 30px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.hero h1{margin:0 0 8px;font-size:clamp(26px,4vw,38px);line-height:1.25;font-weight:800}
+.hero p{margin:0;opacity:.92;max-width:640px}
+.hero .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.hero .chip{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:99px;padding:4px 12px;font-size:13.5px}
+.hero svg.deco{position:absolute;left:-30px;bottom:-40px;opacity:.15;width:260px}
+
+section.step{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:26px 26px 22px;margin-top:22px;box-shadow:var(--shadow)}
+.step-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:6px}
+.badge{flex:none;width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-weight:800;font-size:18px;background:var(--accent-soft);color:var(--accent)}
+.step.done .badge{background:var(--ok);color:#fff}
+.step h2{margin:2px 0 0;font-size:23px;line-height:1.35}
+.step .sub{color:var(--muted);margin:2px 0 0;font-size:15px}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:99px;margin-inline-start:8px;vertical-align:middle}
+.tag.req{background:var(--bad-soft);color:var(--bad)}
+.tag.rec{background:var(--accent-soft);color:var(--accent)}
+.tag.opt{background:var(--surface-2);color:var(--muted)}
+.donebox{margin-inline-start:auto;display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);cursor:pointer;user-select:none;white-space:nowrap;padding:6px 10px;border:1px solid var(--border);border-radius:10px}
+.donebox input{width:18px;height:18px;accent-color:var(--ok)}
+h3{font-size:18px;margin:22px 0 8px}
+ol.steps{padding-inline-start:0;list-style:none;counter-reset:s;margin:10px 0}
+ol.steps>li{counter-increment:s;position:relative;padding-inline-start:40px;margin:12px 0}
+ol.steps>li::before{content:counter(s);position:absolute;inset-inline-start:0;top:1px;width:27px;height:27px;border-radius:50%;background:var(--surface-2);border:1px solid var(--border);display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--muted)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.btn{display:inline-flex;align-items:center;gap:7px;border-radius:12px;padding:8px 14px;font:inherit;font-size:14.5px;font-weight:600;text-decoration:none;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text);transition:transform .1s,border-color .15s}
+.btn:hover{border-color:var(--accent);transform:translateY(-1px)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.small{padding:4px 10px;font-size:13px;border-radius:9px}
+.btn .ext{opacity:.7;font-size:12px}
+
+.callout{border-radius:14px;padding:12px 16px;margin:14px 0;border:1px solid;font-size:15px}
+.callout.info{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 30%,transparent)}
+.callout.warn{background:var(--warn-soft);border-color:color-mix(in srgb,var(--warn) 35%,transparent)}
+.callout.ok{background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 35%,transparent)}
+.callout b:first-child{margin-inline-end:4px}
+
+/* code */
+.code{position:relative;margin:12px 0;border-radius:14px;background:var(--code-bg);overflow:hidden;direction:ltr}
+.code .bar{display:flex;align-items:center;justify-content:space-between;padding:6px 10px 6px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06);font-size:12.5px;color:var(--code-cmt);font-family:Heebo,sans-serif}
+.code pre{margin:0;padding:14px 16px;overflow:auto;color:var(--code-text);font-family:"JetBrains Mono",Consolas,monospace;font-size:13.5px;line-height:1.65}
+.code .c{color:var(--code-cmt)}
+.code .s{color:#9ee6a8}
+.v{color:var(--code-val);font-weight:600}
+.v.empty{color:#ff8fa0}
+.copy{border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#e6e8f2;border-radius:8px;padding:3px 10px;font:inherit;font-size:12.5px;cursor:pointer}
+.copy:hover{background:rgba(255,255,255,.14)}
+.copy.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+
+/* tables */
+.tw{overflow-x:auto;margin:12px 0;border:1px solid var(--border);border-radius:14px}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{padding:9px 12px;text-align:start;border-bottom:1px solid var(--border);vertical-align:top}
+th{background:var(--surface-2);font-weight:700;font-size:13.5px;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+td .mono{direction:ltr;unicode-bidi:isolate}
+.cell-copy{display:inline-flex;align-items:center;gap:6px}
+.cbtn{border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:7px;padding:1px 7px;font-size:12px;cursor:pointer;font-family:Heebo,sans-serif}
+.cbtn:hover{color:var(--accent);border-color:var(--accent)}
+.cbtn.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+
+/* values panel */
+.vals{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:14px}
+.field{background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:12px 14px}
+.field label{display:block;font-weight:700;font-size:14.5px}
+.field .hint{font-size:13px;color:var(--muted);margin:2px 0 8px}
+.field .row{display:flex;gap:6px}
+.field input{flex:1;min-width:0;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:10px;padding:8px 10px;font-family:"JetBrains Mono",monospace;font-size:13px;direction:ltr}
+.field input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+.field .derived{margin-top:7px;font-size:12.5px;color:var(--muted);direction:ltr;text-align:left;font-family:"JetBrains Mono",monospace;word-break:break-all}
+.field .derived b{color:var(--ok)}
+.field.filled{border-color:color-mix(in srgb,var(--ok) 45%,transparent)}
+.field .when{font-size:11.5px;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:99px;padding:1px 8px;margin-inline-start:6px}
+
+/* figures */
+figure{margin:16px 0;background:var(--surface-2);border:1px solid var(--border);border-radius:16px;padding:14px}
+figure svg{direction:ltr;display:block;width:100%;height:auto;max-width:720px;margin:0 auto}
+figcaption{text-align:center;font-size:13.5px;color:var(--muted);margin-top:8px}
+.mk-bg{fill:var(--mock-bg)} .mk-line{stroke:var(--mock-line)} .mk-fill{fill:var(--mock-fill)} .mk-text{fill:var(--mock-text)} .mk-muted{fill:var(--faint)} .mk-accent{fill:var(--accent)} .mk-accent-s{stroke:var(--accent)} .mk-ok{fill:var(--ok)}
+svg text{font-family:Heebo,Arial,sans-serif}
+
+details.acc{border:1px solid var(--border);border-radius:14px;margin:10px 0;background:var(--surface)}
+details.acc summary{cursor:pointer;padding:12px 16px;font-weight:700;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.acc summary::after{content:"＋";color:var(--muted)}
+details.acc[open] summary::after{content:"－"}
+details.acc>div{padding:0 16px 14px}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:14px 0}
+.card{border:1px solid var(--border);border-radius:16px;padding:14px;background:var(--surface-2)}
+.card .ic{font-size:24px}
+.card h4{margin:6px 0 4px;font-size:16px}
+.card p{margin:0;font-size:14px;color:var(--muted)}
+footer{text-align:center;color:var(--faint);font-size:13.5px;margin-top:40px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(30px);background:var(--text);color:var(--bg);padding:9px 18px;border-radius:12px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:50}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;padding:16px 16px 70px}
+  nav.toc{display:none;position:fixed;top:56px;right:0;bottom:0;width:min(280px,85vw);max-height:none;background:var(--surface);border-inline-start:1px solid var(--border);padding:12px;z-index:40;box-shadow:var(--shadow)}
+  nav.toc.open{display:block}
+  #menuBtn{display:inline-block}
+  section.step{padding:20px 16px 18px}
+  .step-head{flex-wrap:wrap}
+  .donebox{margin-inline-start:56px}
+  .progress{display:none}
+  .hero{padding:26px 20px}
+}
+@media print{.topbar,nav.toc,.copy,.cbtn,.donebox{display:none}.layout{display:block}section.step{break-inside:avoid;box-shadow:none}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <button class="iconbtn" id="menuBtn" aria-label="תפריט">☰</button>
+  <div class="brand"><span class="logo">⬇</span><span>מדריך הקמה</span></div>
+  <div class="progress" aria-hidden="true"><i id="pbar"></i></div>
+  <span class="ptext" id="ptext">0%</span>
+  <button class="iconbtn" id="themeBtn" title="מצב תצוגה">🌓</button>
+</header>
+
+<div class="layout">
+<nav class="toc" id="toc">
+  <a href="#intro"><span class="num">★</span>סקירה</a>
+  <a href="#values"><span class="num">✎</span>הערכים שלך</a>
+  <div class="sep">חובה</div>
+  <a href="#s1" data-step="s1"><span class="num">1</span>העלאה לגיטהאב</a>
+  <a href="#s2" data-step="s2"><span class="num">2</span>שרת ב-Railway</a>
+  <a href="#s3" data-step="s3"><span class="num">3</span>טופס וגיליון</a>
+  <a href="#s4" data-step="s4"><span class="num">4</span>סקריפט ההורדות</a>
+  <a href="#s5" data-step="s5"><span class="num">5</span>Web App וחיבור לדרייב</a>
+  <div class="sep">מומלץ / אופציונלי</div>
+  <a href="#s6" data-step="s6"><span class="num">6</span>טופס חיפוש במייל</a>
+  <a href="#s7" data-step="s7"><span class="num">7</span>תוספי דפדפן</a>
+  <a href="#s8" data-step="s8"><span class="num">8</span>תוספות</a>
+  <div class="sep">עזרה</div>
+  <a href="#checklist"><span class="num">✓</span>רשימת ערכים</a>
+  <a href="#trouble"><span class="num">?</span>פתרון בעיות</a>
+</nav>
+
+<main>
+
+<!-- ============ HERO ============ -->
+<div class="hero" id="intro">
+  <svg class="deco" viewBox="0 0 200 200"><circle cx="100" cy="100" r="90" fill="none" stroke="#fff" stroke-width="14"/><path d="M100 50v80M65 100l35 35 35-35" stroke="#fff" stroke-width="14" fill="none" stroke-linecap="round"/></svg>
+  <h1>מערכת הורדות לדרייב + חיפוש במייל</h1>
+  <p>מדריך מלא, צעד אחר צעד: מהעלאת הקוד ועד הורדה ראשונה לדרייב. ממלאים פעם אחת את הערכים שלכם למטה, וכל קטעי הקוד במדריך מתעדכנים לבד ומוכנים להעתקה.</p>
+  <div class="chips">
+    <span class="chip">⏱ כ-45–60 דקות</span>
+    <span class="chip">🎬 יוטיוב · מאקו · כאן 11</span>
+    <span class="chip">📧 תוצאות חיפוש במייל</span>
+    <span class="chip">☁️ ישירות ל-Google Drive</span>
+  </div>
+</div>
+
+<section class="step">
+  <div class="step-head"><div class="badge">★</div><div><h2>איך המערכת עובדת</h2><p class="sub">שלושה חלקים שמדברים זה עם זה</p></div></div>
+  <figure>
+    <svg viewBox="0 0 720 250" role="img" aria-label="תרשים זרימה של המערכת" style="direction:rtl">
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk-accent"/></marker></defs>
+      <g font-size="14" text-anchor="middle">
+        <rect x="560" y="20" width="140" height="70" rx="14" class="mk-bg mk-line" stroke-width="1.5"/>
+        <text x="630" y="50" class="mk-text" font-weight="700">👤 משתמש</text><text x="630" y="72" class="mk-muted" font-size="12">ממלא טופס / לוחץ</text>
+        <rect x="290" y="20" width="200" height="70" rx="14" class="mk-bg" stroke="#34a853" stroke-width="2"/>
+        <text x="390" y="48" class="mk-text" font-weight="700">📝 Google Forms + Sheets</text><text x="390" y="70" class="mk-muted" font-size="12">טופס הורדות · מאושרים · מכסות</text>
+        <rect x="290" y="150" width="200" height="76" rx="14" class="mk-bg" stroke="#4285f4" stroke-width="2"/>
+        <text x="390" y="180" class="mk-text" font-weight="700">⚙️ Apps Script</text><text x="390" y="202" class="mk-muted" font-size="12">בדיקות · מיילים · Web App</text>
+        <rect x="20" y="150" width="200" height="76" rx="14" class="mk-bg" stroke="#8a4dff" stroke-width="2"/>
+        <text x="120" y="180" class="mk-text" font-weight="700">🚂 שרת ב-Railway</text><text x="120" y="202" class="mk-muted" font-size="12">yt-dlp מוריד ומעלה</text>
+        <rect x="20" y="20" width="200" height="70" rx="14" class="mk-bg" stroke="#fbbc04" stroke-width="2"/>
+        <text x="120" y="50" class="mk-text" font-weight="700">☁️ Google Drive</text><text x="120" y="72" class="mk-muted" font-size="12">הקובץ נשמר + קישור במייל</text>
+      </g>
+      <g fill="none" stroke-width="2" class="mk-accent-s">
+        <path d="M558 55H494" marker-end="url(#ar)"/>
+        <path d="M390 92v54" marker-end="url(#ar)"/>
+        <path d="M288 188H224" marker-end="url(#ar)"/>
+        <path d="M120 148V94" marker-end="url(#ar)"/>
+        <path d="M222 205 Q255 240 288 205" stroke-dasharray="5 5" marker-end="url(#ar)"/>
+      </g>
+      <text x="255" y="246" text-anchor="middle" font-size="11.5" class="mk-muted">טוקן לדרייב (גשר)</text>
+    </svg>
+    <figcaption>השרת לא מחזיק סיסמה לדרייב. הוא מקבל טוקן מה-Web App של Apps Script, ולכן אין צורך בהגדרות OAuth מסובכות.</figcaption>
+  </figure>
+  <h3>מה צריך לפני שמתחילים</h3>
+  <div class="cards">
+    <div class="card"><div class="ic">🟢</div><h4>חשבון Google</h4><p>עדיף חשבון ייעודי. הקבצים נשמרים בדרייב שלו, והמיילים יוצאים ממנו.</p></div>
+    <div class="card"><div class="ic">🐙</div><h4>חשבון GitHub</h4><p>חינמי. שם יישב הקוד, ו-Railway ימשוך אותו משם.</p></div>
+    <div class="card"><div class="ic">🚂</div><h4>חשבון Railway</h4><p>אחסון השרת. שירות בתשלום עם תקופת ניסיון; כדאי לבדוק באתר את המחיר העדכני.</p></div>
+    <div class="card"><div class="ic">🔑</div><h4>מפתח API</h4><p>מחרוזת אקראית. יש כפתור שמייצר אותה בפאנל הערכים למטה.</p></div>
+  </div>
+</section>
+
+<!-- ============ VALUES ============ -->
+<section class="step" id="values">
+  <div class="step-head"><div class="badge">✎</div><div><h2>הערכים שלך</h2><p class="sub">ממלאים תוך כדי ההתקדמות. כל קטעי הקוד והטבלאות במדריך מתעדכנים מיד.</p></div></div>
+  <div class="callout info"><b>💡</b>אפשר להדביק כאן קישור מלא (של טופס, גיליון או תיקייה), והמזהה יחולץ ממנו אוטומטית. הערכים נשמרים רק בדפדפן הזה, ולא נשלחים לשום מקום.</div>
+  <div class="vals">
+    <div class="field" data-f="apiKey"><label>API_KEY <span class="when">לפני שלב 2</span></label><div class="hint">המפתח הראשי. אותו ערך נכנס ל-Railway ולסקריפט.</div><div class="row"><input id="f-apiKey" placeholder="לחצו 'צור'"><button class="btn small" data-gen="apiKey">🎲 צור</button></div></div>
+    <div class="field" data-f="searchKey"><label>UNIFIED_SEARCH_KEY <span class="when">לפני שלב 2</span></label><div class="hint">מפתח נפרד לטופס החיפוש (מומלץ).</div><div class="row"><input id="f-searchKey" placeholder="לחצו 'צור'"><button class="btn small" data-gen="searchKey">🎲 צור</button></div></div>
+    <div class="field" data-f="railway"><label>כתובת השרת ב-Railway <span class="when">שלב 2</span></label><div class="hint">מ-Settings → Networking → Generate Domain.</div><div class="row"><input id="f-railway" placeholder="https://xxxx.up.railway.app"></div><div class="derived" id="d-railway"></div></div>
+    <div class="field" data-f="form"><label>קישור עריכה של טופס ההורדות <span class="when">שלב 3</span></label><div class="hint">הכתובת בזמן עריכת הטופס (…/edit).</div><div class="row"><input id="f-form" placeholder="https://docs.google.com/forms/d/…/edit"></div><div class="derived" id="d-form"></div></div>
+    <div class="field" data-f="formShort"><label>קישור שיתוף מקוצר לטופס <span class="when">שלב 3</span></label><div class="hint">שליחה → 🔗 → קיצור כתובת URL.</div><div class="row"><input id="f-formShort" placeholder="https://forms.gle/…"></div></div>
+    <div class="field" data-f="prefill"><label>קישור "ממולא מראש" <span class="when">שלב 3</span></label><div class="hint">עם <code>AAA</code> בשדה הקישור ו"וידאו" בסוג. הבסיס ושני ה-entry יחולצו ממנו.</div><div class="row"><input id="f-prefill" placeholder="https://docs.google.com/forms/d/e/…/viewform?usp=pp_url&entry…"></div><div class="derived" id="d-prefill"></div></div>
+    <div class="field" data-f="sheet"><label>קישור לגיליון התשובות <span class="when">שלב 3</span></label><div class="hint">הגיליון שמחובר לטופס ההורדות.</div><div class="row"><input id="f-sheet" placeholder="https://docs.google.com/spreadsheets/d/…/edit"></div><div class="derived" id="d-sheet"></div></div>
+    <div class="field" data-f="webapp"><label>כתובת ה-Web App <span class="when">שלב 5</span></label><div class="hint">מתקבלת בפריסה ומסתיימת ב-<code>/exec</code>.</div><div class="row"><input id="f-webapp" placeholder="https://script.google.com/macros/s/…/exec"></div></div>
+    <div class="field" data-f="searchForm"><label>קישור עריכה של טופס החיפוש <span class="when">שלב 6</span></label><div class="hint">רק אם מקימים את טופס החיפוש.</div><div class="row"><input id="f-searchForm" placeholder="https://docs.google.com/forms/d/…/edit"></div><div class="derived" id="d-searchForm"></div></div>
+    <div class="field" data-f="folder"><label>תיקיית יעד בדרייב <span class="when">אופציונלי</span></label><div class="hint">קישור לתיקייה. ריק = התיקייה הראשית.</div><div class="row"><input id="f-folder" placeholder="https://drive.google.com/drive/folders/…"></div><div class="derived" id="d-folder"></div></div>
+  </div>
+  <div class="btns" style="margin-top:14px"><button class="btn" id="clearVals">🗑 ניקוי כל הערכים</button></div>
+</section>
+
+<!-- ============ STEP 1 ============ -->
+<section class="step" id="s1">
+  <div class="step-head"><div class="badge">1</div><div><h2>העלאת הקוד לגיטהאב <span class="tag req">חובה</span></h2><p class="sub">כ-5 דקות</p></div><label class="donebox"><input type="checkbox" data-done="s1">סיימתי</label></div>
+  <ol class="steps">
+    <li>פותחים מאגר חדש. רצוי לבחור <b>Private</b>, ו<b>לא</b> לסמן "Add a README".
+      <div class="btns"><a class="btn primary" href="https://github.com/new" target="_blank" rel="noopener">🐙 יצירת מאגר חדש <span class="ext">↗</span></a></div></li>
+    <li>חולצים את ה-zip במחשב.</li>
+    <li>במאגר החדש לוחצים <b>uploading an existing file</b>, גוררים את <b>כל התוכן</b> של התיקייה <code>yt-drive-system</code> (את התיקיות עצמן, לא את התיקייה החיצונית), ולוחצים <b>Commit changes</b>.</li>
+  </ol>
+  <div class="callout warn"><b>⚠️</b>את התיקייה הנסתרת <code>.github</code> לפעמים לא רואים בגרירה. היא לא חובה, והיא משמשת רק לכפתור שליחה מגיטהאב ולבדיקות.</div>
+  <details class="acc"><summary>למתקדמים: העלאה עם git</summary><div>
+    <div class="code"><div class="bar"><span>Terminal</span><button class="copy">העתק</button></div><pre>cd yt-drive-system
+git init &amp;&amp; git add . &amp;&amp; git commit -m "initial"
+git branch -M main
+git remote add origin https://github.com/<span class="v">YOUR_USER</span>/<span class="v">YOUR_REPO</span>.git
+git push -u origin main</pre></div>
+  </div></details>
+</section>
+
+<!-- ============ STEP 2 ============ -->
+<section class="step" id="s2">
+  <div class="step-head"><div class="badge">2</div><div><h2>פתיחת שרת ההורדות ב-Railway <span class="tag req">חובה</span></h2><p class="sub">כ-10 דקות, ועוד כמה דקות בנייה</p></div><label class="donebox"><input type="checkbox" data-done="s2">סיימתי</label></div>
+  <ol class="steps">
+    <li>ב-Railway: <b>New Project → Deploy from GitHub repo</b>. מאשרים גישה ובוחרים את המאגר.
+      <div class="btns"><a class="btn primary" href="https://railway.com/new" target="_blank" rel="noopener">🚂 פרויקט חדש ב-Railway <span class="ext">↗</span></a></div></li>
+    <li>נכנסים לשירות שנוצר → <b>Settings</b> → <b>Root Directory</b>, וכותבים <code>download-service</code>. זה הצעד הכי חשוב: בלעדיו Railway לא ימצא את הקוד.</li>
+    <li>באותו מסך: <b>Networking → Generate Domain</b>. מעתיקים את הכתובת ל<a href="#values">פאנל הערכים</a>.</li>
+  </ol>
+  <figure>
+    <svg viewBox="0 0 720 300" role="img" aria-label="הדגמה: הגדרות Railway">
+      <rect x="1" y="1" width="718" height="298" rx="14" class="mk-bg mk-line" stroke-width="1.5"/>
+      <rect x="1" y="1" width="718" height="44" rx="14" class="mk-fill"/><rect x="1" y="30" width="718" height="15" class="mk-fill"/>
+      <circle cx="24" cy="23" r="6" fill="#ff5f57"/><circle cx="44" cy="23" r="6" fill="#febc2e"/><circle cx="64" cy="23" r="6" fill="#28c840"/>
+      <text x="360" y="28" text-anchor="middle" font-size="13" class="mk-muted">railway.com › project › download-service</text>
+      <g font-size="14" direction="ltr">
+        <text x="30" y="80" class="mk-muted">Deployments</text><text x="140" y="80" class="mk-muted">Variables</text><text x="240" y="80" class="mk-text" font-weight="700">Settings</text>
+        <rect x="236" y="88" width="62" height="3" rx="1.5" class="mk-accent"/>
+        <text x="30" y="128" class="mk-text" font-weight="700">Source</text>
+        <text x="30" y="155" class="mk-muted" font-size="13">Root Directory</text>
+        <rect x="30" y="164" width="300" height="36" rx="8" class="mk-fill mk-line" stroke-width="1.2"/>
+        <rect x="28" y="162" width="304" height="40" rx="10" fill="none" stroke="#ff5a5f" stroke-width="2.5" stroke-dasharray="6 4"/>
+        <text x="42" y="188" class="mk-text" font-family="JetBrains Mono,monospace">download-service</text>
+        <text x="390" y="128" class="mk-text" font-weight="700">Networking</text>
+        <text x="390" y="155" class="mk-muted" font-size="13">Public Networking</text>
+        <rect x="390" y="164" width="170" height="36" rx="8" class="mk-accent"/>
+        <text x="475" y="188" text-anchor="middle" fill="#fff" font-weight="700">Generate Domain</text>
+        <text x="390" y="232" class="mk-muted" font-size="12.5" font-family="JetBrains Mono,monospace">xxxx.up.railway.app ⧉</text>
+        <text x="30" y="250" class="mk-text" font-weight="700">Build</text>
+        <text x="30" y="275" class="mk-muted" font-size="13">Builder: Dockerfile (detected)</text>
+      </g>
+      <g font-size="13" text-anchor="middle"><circle cx="350" cy="182" r="13" fill="#ff5a5f"/><text x="350" y="187" fill="#fff" font-weight="700">2</text><circle cx="585" cy="182" r="13" fill="#ff5a5f"/><text x="585" y="187" fill="#fff" font-weight="700">3</text></g>
+    </svg>
+    <figcaption>הדגמה: מגדירים Root Directory ‏(2) ומייצרים כתובת לשרת (3).</figcaption>
+  </figure>
+  <ol class="steps" start="4" style="counter-reset:s 3">
+    <li>לשונית <b>Variables</b> → <b>New Variable</b>. מוסיפים את המשתנים, וכל שורה בטבלה כבר מוכנה להעתקה:</li>
+  </ol>
+  <div class="tw"><table>
+    <thead><tr><th>שם המשתנה</th><th>ערך</th><th>מתי</th></tr></thead>
+    <tbody>
+      <tr><td><span class="cell-copy"><span class="mono">API_KEY</span><button class="cbtn" data-copy="API_KEY">⧉</button></span></td><td><span class="cell-copy"><span class="mono v" data-v="apiKey"></span><button class="cbtn" data-copyv="apiKey">⧉</button></span></td><td><span class="tag req">עכשיו</span></td></tr>
+      <tr><td><span class="cell-copy"><span class="mono">UNIFIED_SEARCH_KEY</span><button class="cbtn" data-copy="UNIFIED_SEARCH_KEY">⧉</button></span></td><td><span class="cell-copy"><span class="mono v" data-v="searchKey"></span><button class="cbtn" data-copyv="searchKey">⧉</button></span></td><td><span class="tag rec">עכשיו</span></td></tr>
+      <tr><td><span class="cell-copy"><span class="mono">DRIVE_TOKEN_BRIDGE_URL</span><button class="cbtn" data-copy="DRIVE_TOKEN_BRIDGE_URL">⧉</button></span></td><td><span class="cell-copy"><span class="mono v" data-v="webapp"></span><button class="cbtn" data-copyv="webapp">⧉</button></span></td><td><span class="tag req">בשלב 5</span></td></tr>
+      <tr><td><span class="cell-copy"><span class="mono">DRIVE_FOLDER_ID</span><button class="cbtn" data-copy="DRIVE_FOLDER_ID">⧉</button></span></td><td><span class="cell-copy"><span class="mono v" data-v="folderId"></span><button class="cbtn" data-copyv="folderId">⧉</button></span></td><td><span class="tag opt">אופציונלי</span></td></tr>
+      <tr><td><span class="mono">KAN_PROXY_URL</span></td><td>פרוקסי ישראלי, נדרש רק לכאן 11 (ראו <a href="#s8">שלב 8</a>)</td><td><span class="tag opt">אופציונלי</span></td></tr>
+      <tr><td><span class="mono">YOUTUBE_COOKIES</span></td><td>רק אם יוטיוב חוסם. בדרך כלל לא נדרש</td><td><span class="tag opt">אופציונלי</span></td></tr>
+      <tr><td><span class="mono">GEMINI_API_KEY</span></td><td>ליצירת תמונות (<a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio</a>)</td><td><span class="tag opt">אופציונלי</span></td></tr>
+    </tbody>
+  </table></div>
+  <ol class="steps" start="5" style="counter-reset:s 4">
+    <li>ממתינים לסיום הבנייה (Deployments → ✅). הבנייה הראשונה לוקחת כ-5 דקות.</li>
+    <li>בודקים שהשרת חי. אמורה להופיע תשובה עם <code>"status": "ok"</code>:
+      <div class="btns"><a class="btn" data-href="railwayRoot" target="_blank" rel="noopener">🩺 בדיקת השרת <span class="ext">↗</span></a></div></li>
+  </ol>
+  <div class="callout info"><b>🔒</b>משתמשי נטפרי: דומיינים של railway.app חסומים בדרך כלל מהמחשב, וזה לא מפריע, כי כל התקשורת עוברת דרך שרתי גוגל. לבדיקה ישירה אפשר להשתמש בטלפון עם גלישה סלולרית, או ב<a href="#s8">כפתור של גיטהאב</a>.</div>
+</section>
+
+<!-- ============ STEP 3 ============ -->
+<section class="step" id="s3">
+  <div class="step-head"><div class="badge">3</div><div><h2>טופס ההורדות והגיליון <span class="tag req">חובה</span></h2><p class="sub">כ-10 דקות</p></div><label class="donebox"><input type="checkbox" data-done="s3">סיימתי</label></div>
+  <h3>3א. יצירת הטופס</h3>
+  <div class="btns"><a class="btn primary" href="https://forms.new" target="_blank" rel="noopener">📝 טופס חדש <span class="ext">↗</span></a></div>
+  <ol class="steps">
+    <li>שאלה 1: כותרת <b><code>קישור</code></b>, סוג "תשובה קצרה", ✓ חובה.</li>
+    <li>שאלה 2: כותרת <b><code>סוג הורדה</code></b>, סוג "בחירה מרובה", ✓ חובה. שלוש אפשרויות, כתובות <b>בדיוק</b> כך:
+      <div class="btns"><button class="btn small" data-copy="וידאו">וידאו ⧉</button><button class="btn small" data-copy="אודיו">אודיו ⧉</button><button class="btn small" data-copy="וידאו ואודיו">וידאו ואודיו ⧉</button></div></li>
+    <li>⚙️ <b>הגדרות → תשובות → איסוף כתובות אימייל → מאומתות</b>.</li>
+    <li>לשונית <b>תשובות → קישור ל-Sheets → יצירת גיליון חדש</b>.</li>
+  </ol>
+  <figure>
+    <svg viewBox="0 0 720 330" role="img" aria-label="הדגמה: מבנה טופס ההורדות">
+      <rect x="1" y="1" width="718" height="328" rx="14" class="mk-fill mk-line" stroke-width="1.5"/>
+      <rect x="150" y="16" width="420" height="78" rx="10" class="mk-bg mk-line"/><rect x="150" y="16" width="420" height="9" rx="4" fill="#673ab7"/>
+      <text x="550" y="54" text-anchor="end" font-size="19" font-weight="700" class="mk-text">בקשת הורדה לדרייב</text>
+      <text x="550" y="78" text-anchor="end" font-size="12.5" class="mk-muted">✓ איסוף כתובות אימייל: מאומתות</text>
+      <rect x="150" y="104" width="420" height="80" rx="10" class="mk-bg mk-line"/>
+      <text x="550" y="132" text-anchor="end" font-size="15" class="mk-text" font-weight="700">קישור <tspan fill="#d93025">*</tspan></text>
+      <line x1="330" y1="164" x2="550" y2="164" class="mk-line" stroke-width="1.5"/><text x="550" y="158" text-anchor="end" font-size="12.5" class="mk-muted">תשובה קצרה</text>
+      <rect x="150" y="194" width="420" height="124" rx="10" class="mk-bg mk-line"/>
+      <text x="550" y="222" text-anchor="end" font-size="15" class="mk-text" font-weight="700">סוג הורדה <tspan fill="#d93025">*</tspan></text>
+      <g font-size="14" class="mk-text" text-anchor="end">
+        <circle cx="540" cy="248" r="7" fill="none" class="mk-line" stroke-width="2"/><text x="526" y="253">וידאו</text>
+        <circle cx="540" cy="274" r="7" fill="none" class="mk-line" stroke-width="2"/><text x="526" y="279">אודיו</text>
+        <circle cx="540" cy="300" r="7" fill="none" class="mk-line" stroke-width="2"/><text x="526" y="305">וידאו ואודיו</text>
+      </g>
+      <g font-size="12.5" class="mk-muted" style="direction:rtl"><text x="80" y="140" text-anchor="middle">→ "קישור" בכותרת</text><text x="80" y="230" text-anchor="middle">→ "סוג" בכותרת</text><text x="80" y="280" text-anchor="middle">→ בדיוק כך</text></g>
+    </svg>
+    <figcaption>הדגמה: המבנה הנדרש של טופס ההורדות.</figcaption>
+  </figure>
+
+  <h3>3ב. הכנת הגיליון</h3>
+  <ol class="steps">
+    <li>הלשונית שנוצרה צריכה להיקרא <code>תגובות לטופס 1</code>. אם ממשק גוגל באנגלית היא תיקרא <code>Form Responses 1</code>, ואז משנים את שמה: <button class="cbtn" data-copy="תגובות לטופס 1">העתק שם ⧉</button></li>
+    <li>מוסיפים לשונית חדשה (➕ למטה) בשם <code>מאושרים</code> <button class="cbtn" data-copy="מאושרים">העתק שם ⧉</button>, ובשורה 1 כותבים כותרות:</li>
+  </ol>
+  <figure>
+    <svg viewBox="0 0 720 196" role="img" aria-label="הדגמה: לשונית מאושרים">
+      <rect x="1" y="1" width="718" height="194" rx="12" class="mk-bg mk-line" stroke-width="1.5"/>
+      <g font-size="12.5" text-anchor="middle" class="mk-muted"><rect x="1" y="1" width="718" height="26" rx="12" class="mk-fill"/>
+        <text x="610" y="19">A</text><text x="460" y="19">B</text><text x="355" y="19">C</text><text x="255" y="19">D</text><text x="155" y="19">E</text><text x="60" y="19">F…</text></g>
+      <g class="mk-line" stroke-width="1"><line x1="1" y1="27" x2="719" y2="27"/><line x1="1" y1="63" x2="719" y2="63"/><line x1="1" y1="99" x2="719" y2="99"/><line x1="1" y1="135" x2="719" y2="135"/>
+        <line x1="510" y1="1" x2="510" y2="160"/><line x1="405" y1="1" x2="405" y2="160"/><line x1="305" y1="1" x2="305" y2="160"/><line x1="205" y1="1" x2="205" y2="160"/><line x1="105" y1="1" x2="105" y2="160"/></g>
+      <g font-size="13.5" text-anchor="middle" class="mk-text" font-weight="700"><text x="614" y="50">אימייל</text><text x="458" y="50">מכסה</text><text x="355" y="50">מכסה יומית</text><text x="255" y="50">שימוש היום</text><text x="155" y="50">עדכון אחרון</text><text x="55" y="50">סטטיסטיקה</text></g>
+      <g font-size="13" text-anchor="middle" class="mk-text"><text x="614" y="86" direction="ltr">me@gmail.com</text><text x="458" y="86">ללא הגבלה</text><text x="255" y="86" class="mk-muted">אוטומטי</text><text x="155" y="86" class="mk-muted">אוטומטי</text><text x="55" y="86" class="mk-muted">אוטומטי</text>
+        <text x="614" y="122" direction="ltr">friend@gmail.com</text><text x="458" y="122">50</text><text x="355" y="122"></text>
+        <text x="614" y="158" direction="ltr">kid@gmail.com</text><text x="355" y="158">3</text></g>
+      <text x="360" y="186" text-anchor="middle" font-size="12" class="mk-muted" style="direction:rtl">B = מכסה כוללת (או "ללא הגבלה") · C = מכסה ליום (כש-B ריק) · D–F הסקריפט ממלא לבד</text>
+    </svg>
+    <figcaption>הדגמה: הלשונית "מאושרים". מוסיפים את עצמכם בשורה 2, עם "ללא הגבלה".</figcaption>
+  </figure>
+  <div class="btns"><button class="btn small" data-copy="ללא הגבלה">העתק "ללא הגבלה" ⧉</button><button class="btn small" data-copy="אימייל&#9;מכסה&#9;מכסה יומית&#9;שימוש היום&#9;עדכון אחרון">העתק את כל שורת הכותרות ⧉</button></div>
+
+  <h3>3ג. איסוף המזהים</h3>
+  <ol class="steps">
+    <li>מעתיקים לפאנל הערכים את <b>קישור העריכה של הטופס</b>, את <b>קישור השיתוף המקוצר</b> ואת <b>קישור הגיליון</b>.</li>
+    <li>קישור ממולא מראש: בטופס ⋮ → <b>קבלת קישור ממולא מראש</b> → כותבים <code>AAA</code> בשדה הקישור, בוחרים "וידאו" → <b>קבלת קישור → העתקת קישור</b> → מדביקים <a href="#values">בפאנל</a>.</li>
+  </ol>
+  <figure>
+    <svg viewBox="0 0 720 150" role="img" aria-label="הדגמה: מבנה קישור ממולא מראש">
+      <rect x="1" y="1" width="718" height="148" rx="12" class="mk-bg mk-line" stroke-width="1.5"/>
+      <g font-family="JetBrains Mono,monospace" font-size="12.5" direction="ltr">
+        <text x="16" y="52"><tspan class="mk-text">https://docs.google.com/forms/d/e/</tspan><tspan fill="#8a4dff" font-weight="700">1FAIpQL…xyz</tspan><tspan class="mk-text">/viewform?usp=pp_url&amp;</tspan><tspan fill="#e8710a" font-weight="700">entry.111</tspan><tspan class="mk-text">=AAA&amp;</tspan><tspan fill="#1e8e3e" font-weight="700">entry.222</tspan><tspan class="mk-text">=וידאו</tspan></text>
+      </g>
+      <g font-size="12.5" text-anchor="middle"><line x1="200" y1="62" x2="200" y2="90" stroke="#8a4dff" stroke-width="2"/><text x="200" y="108" fill="#8a4dff" font-weight="700">DOWNLOAD_FORM_BASE_URL</text><text x="200" y="126" class="mk-muted">(הכל עד ‎/viewform)</text>
+        <line x1="470" y1="62" x2="470" y2="90" stroke="#e8710a" stroke-width="2"/><text x="470" y="108" fill="#e8710a" font-weight="700">ENTRY_URL</text>
+        <line x1="620" y1="62" x2="620" y2="90" stroke="#1e8e3e" stroke-width="2"/><text x="620" y="108" fill="#1e8e3e" font-weight="700">ENTRY_TYPE</text></g>
+    </svg>
+    <figcaption>הדגמה: הפאנל מפרק את הקישור לשלושת הערכים לבד.</figcaption>
+  </figure>
+</section>
+
+<!-- ============ STEP 4 ============ -->
+<section class="step" id="s4">
+  <div class="step-head"><div class="badge">4</div><div><h2>סקריפט ההורדות <span class="tag req">חובה</span></h2><p class="sub">כ-10 דקות</p></div><label class="donebox"><input type="checkbox" data-done="s4">סיימתי</label></div>
+  <ol class="steps">
+    <li>בגיליון: <b>תוספים (Extensions) → Apps Script</b>.
+      <div class="btns"><a class="btn" data-href="sheetUrl" target="_blank" rel="noopener">📊 פתיחת הגיליון שלך <span class="ext">↗</span></a></div></li>
+    <li>⚙️ <b>Project Settings</b> → ✓ <b>Show "appsscript.json" manifest file in editor</b>.</li>
+    <li>בעורך יוצרים שלושה קבצים, ומדביקים בהם את התוכן מהתיקייה <code>apps-script/downloads/</code>:</li>
+  </ol>
+  <figure>
+    <svg viewBox="0 0 720 230" role="img" aria-label="הדגמה: קבצים בעורך Apps Script">
+      <rect x="1" y="1" width="718" height="228" rx="14" class="mk-bg mk-line" stroke-width="1.5"/>
+      <rect x="1" y="1" width="718" height="40" rx="14" class="mk-fill"/><rect x="1" y="26" width="718" height="15" class="mk-fill"/>
+      <text x="20" y="27" font-size="14" class="mk-text" font-weight="700" direction="ltr">Apps Script · מערכת הורדות</text>
+      <rect x="560" y="41" width="159" height="188" class="mk-fill"/>
+      <g font-size="13.5" direction="ltr" class="mk-text">
+        <text x="575" y="68" class="mk-muted" font-size="12">Files  ＋</text>
+        <rect x="568" y="80" width="144" height="28" rx="6" class="mk-bg"/><text x="580" y="99">📄 Code.gs</text>
+        <rect x="568" y="114" width="144" height="28" rx="6" class="mk-bg"/><text x="580" y="133">📄 channels.gs</text>
+        <rect x="568" y="148" width="144" height="28" rx="6" class="mk-bg"/><text x="580" y="167">{ } appsscript.json</text>
+      </g>
+      <g font-size="13" direction="ltr">
+        <rect x="20" y="56" width="140" height="28" rx="7" class="mk-accent"/><text x="38" y="75" fill="#fff" font-weight="700">▶ Run</text>
+        <rect x="170" y="56" width="250" height="28" rx="7" class="mk-fill mk-line"/><text x="182" y="75" class="mk-text">__התקן_טריגר_סריקת_ערוצים ▾</text>
+        <text x="20" y="118" class="mk-muted" font-family="JetBrains Mono,monospace">1  // ===== הגדרות =====</text>
+        <text x="20" y="142" class="mk-text" font-family="JetBrains Mono,monospace">3  const RAILWAY_URL = "https://…/download";</text>
+        <text x="20" y="166" class="mk-text" font-family="JetBrains Mono,monospace">6  const API_KEY = "…";</text>
+        <text x="20" y="190" class="mk-text" font-family="JetBrains Mono,monospace">24 const FORM_ID = "…";</text>
+      </g>
+    </svg>
+    <figcaption>הדגמה: שלושה קבצים בצד, ותפריט בחירת פונקציה עם כפתור Run למעלה.</figcaption>
+  </figure>
+  <div class="tw"><table>
+    <thead><tr><th>קובץ בעורך</th><th>איך יוצרים</th><th>מה מדביקים</th></tr></thead>
+    <tbody>
+      <tr><td><span class="mono">Code.gs</span></td><td>קיים כבר. מוחקים את כל מה שיש בו</td><td><span class="mono">apps-script/downloads/Code.gs</span></td></tr>
+      <tr><td><span class="mono">channels.gs</span></td><td>➕ → Script → שם: <code>channels</code></td><td><span class="mono">apps-script/downloads/channels.gs</span></td></tr>
+      <tr><td><span class="mono">appsscript.json</span></td><td>מופיע אחרי שלב 2</td><td><span class="mono">apps-script/downloads/appsscript.json</span></td></tr>
+    </tbody>
+  </table></div>
+  <ol class="steps" start="4" style="counter-reset:s 3">
+    <li>בראש <code>Code.gs</code> מחליפים את השורות האלה. הקוד כאן כבר כולל את הערכים שלך:</li>
+  </ol>
+  <div class="code"><div class="bar"><span>Code.gs · בראש הקובץ</span><button class="copy">העתק</button></div><pre>const RAILWAY_URL =
+  "<span class="v" data-v="railwayDownload"></span>";
+
+const API_KEY = "<span class="v" data-v="apiKey"></span>";
+
+const FORM_ID =
+  "<span class="v" data-v="formId"></span>";
+
+const FORM_URL =
+  "<span class="v" data-v="formShort"></span>";</pre></div>
+  <div class="callout info"><b>ℹ️</b>אלה ארבע הגדרות נפרדות בקובץ, ולכן כדאי להחליף כל אחת במקומה. אפשר גם לשנות את <code>DAILY_GLOBAL_LIMIT</code> (מכסה יומית כוללת, ברירת מחדל 200). בדיקת נטפרי כבויה כברירת מחדל.</div>
+  <ol class="steps" start="5" style="counter-reset:s 4">
+    <li>שומרים (<kbd>Ctrl</kbd>+<kbd>S</kbd>), ומריצים לפי הסדר. בוחרים כל פונקציה בתפריט ולוחצים <b>▶ Run</b>:</li>
+  </ol>
+  <div class="tw"><table>
+    <thead><tr><th>#</th><th>פונקציה</th><th>מה היא עושה</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><span class="cell-copy"><span class="mono">__התקן_טריגר_סריקת_ערוצים</span><button class="cbtn" data-copy="__התקן_טריגר_סריקת_ערוצים">⧉</button></span></td><td>מבקשת אישור הרשאות ומתקינה את הטריגרים, שרצים כל 5 דקות</td></tr>
+      <tr><td>2</td><td><span class="cell-copy"><span class="mono">__עבד_בקשות_טופס_עכשיו</span><button class="cbtn" data-copy="__עבד_בקשות_טופס_עכשיו">⧉</button></span></td><td>הרצת בדיקה מיידית של הטופס</td></tr>
+      <tr><td>3</td><td><span class="cell-copy"><span class="mono">__אשר_הרשאת_שליחת_מייל</span><button class="cbtn" data-copy="__אשר_הרשאת_שליחת_מייל">⧉</button></span></td><td>מאשרת את שליחת המיילים</td></tr>
+      <tr><td>4</td><td><span class="cell-copy"><span class="mono">__בדוק_שליחת_מייל</span><button class="cbtn" data-copy="__בדוק_שליחת_מייל">⧉</button></span></td><td>מאבחנת את מסלול המייל (התוצאה מופיעה ביומן)</td></tr>
+    </tbody>
+  </table></div>
+  <figure>
+    <svg viewBox="0 0 720 210" role="img" aria-label="הדגמה: מסך אישור הרשאות">
+      <rect x="1" y="1" width="718" height="208" rx="14" class="mk-fill mk-line" stroke-width="1.5"/>
+      <g font-size="13" text-anchor="middle">
+        <rect x="20" y="30" width="210" height="150" rx="12" class="mk-bg mk-line"/><text x="125" y="62" class="mk-text" font-weight="700">Authorization required</text>
+        <rect x="55" y="130" width="140" height="32" rx="8" class="mk-accent"/><text x="125" y="151" fill="#fff" font-weight="700" direction="ltr">Review permissions</text>
+        <rect x="255" y="30" width="210" height="150" rx="12" class="mk-bg mk-line"/><text x="360" y="62" class="mk-text" font-weight="700" direction="ltr">Google hasn't verified</text><text x="360" y="82" class="mk-text" font-weight="700" direction="ltr">this app</text>
+        <text x="300" y="150" class="mk-accent" font-weight="700" direction="ltr" text-decoration="underline">Advanced</text><text x="400" y="122" class="mk-muted" font-size="11.5" direction="ltr">Go to project (unsafe)</text>
+        <rect x="490" y="30" width="210" height="150" rx="12" class="mk-bg mk-line"/><text x="595" y="62" class="mk-text" font-weight="700" direction="ltr">wants access to your</text><text x="595" y="82" class="mk-text" font-weight="700" direction="ltr">Google Account</text>
+        <rect x="595" y="130" width="80" height="32" rx="8" class="mk-accent"/><text x="635" y="151" fill="#fff" font-weight="700">Allow</text>
+      </g>
+      <g font-size="22" class="mk-muted" text-anchor="middle"><text x="243" y="112">‹</text><text x="478" y="112">‹</text></g>
+      <text x="360" y="200" text-anchor="middle" font-size="12.5" class="mk-muted" style="direction:rtl">זה הסקריפט שלכם, ולכן "unsafe" כאן זה בסדר</text>
+    </svg>
+    <figcaption>הדגמה: אישור ההרשאות בהרצה הראשונה. Review → Advanced → Go to… → Allow.</figcaption>
+  </figure>
+  <details class="acc"><summary>הבדיקה אומרת ש-Gmail API כבוי?</summary><div>
+    <p>המערכת תעבוד גם כך, אבל עם מגבלה של 100 מיילים ביום (MailApp). כדי להסיר את המגבלה:</p>
+    <ol class="steps"><li>Project Settings → <b>Google Cloud Platform (GCP) Project → Change project</b> → מחברים פרויקט GCP רגיל (לפי מספר הפרויקט).</li>
+    <li>מפעילים את Gmail API בפרויקט:<div class="btns"><a class="btn small" href="https://console.cloud.google.com/apis/library/gmail.googleapis.com" target="_blank" rel="noopener">Gmail API ב-Cloud Console ↗</a></div></li>
+    <li>אם מופיע "access_denied / האפליקציה בבדיקה": <b>OAuth consent screen → Audience → Test users → Add users</b>, ומוסיפים את החשבון שלכם.</li></ol>
+  </div></details>
+</section>
+
+<!-- ============ STEP 5 ============ -->
+<section class="step" id="s5">
+  <div class="step-head"><div class="badge">5</div><div><h2>פריסת Web App וחיבור לדרייב <span class="tag req">חובה</span></h2><p class="sub">כ-5 דקות</p></div><label class="donebox"><input type="checkbox" data-done="s5">סיימתי</label></div>
+  <ol class="steps">
+    <li>בעורך של סקריפט ההורדות: <b>Deploy → New deployment</b> → ⚙️ → <b>Web app</b>.</li>
+    <li>מגדירים <b>Execute as: Me</b> ו-<b>Who has access: Anyone</b>, לוחצים <b>Deploy</b>, ומאשרים.</li>
+    <li>מעתיקים את <b>Web app URL</b> (מסתיים ב-<code>/exec</code>) ל<a href="#values">פאנל</a>.</li>
+  </ol>
+  <figure>
+    <svg viewBox="0 0 720 250" role="img" aria-label="הדגמה: חלון פריסת Web App">
+      <rect x="1" y="1" width="718" height="248" rx="14" class="mk-fill mk-line" stroke-width="1.5"/>
+      <rect x="140" y="16" width="440" height="218" rx="12" class="mk-bg mk-line"/>
+      <g direction="ltr" font-size="13.5">
+        <text x="160" y="46" class="mk-text" font-weight="700" font-size="16">New deployment</text>
+        <text x="160" y="76" class="mk-muted">Select type ⚙️ → Web app</text>
+        <text x="160" y="108" class="mk-muted" font-size="12.5">Execute as</text>
+        <rect x="160" y="114" width="190" height="30" rx="7" class="mk-fill mk-line"/><text x="172" y="134" class="mk-text">Me (you@gmail.com) ▾</text>
+        <text x="370" y="108" class="mk-muted" font-size="12.5">Who has access</text>
+        <rect x="370" y="114" width="190" height="30" rx="7" class="mk-fill mk-line"/><text x="382" y="134" class="mk-text">Anyone ▾</text>
+        <rect x="158" y="112" width="194" height="34" rx="9" fill="none" stroke="#ff5a5f" stroke-width="2" stroke-dasharray="5 4"/>
+        <rect x="368" y="112" width="194" height="34" rx="9" fill="none" stroke="#ff5a5f" stroke-width="2" stroke-dasharray="5 4"/>
+        <rect x="470" y="168" width="90" height="32" rx="8" class="mk-accent"/><text x="515" y="189" text-anchor="middle" fill="#fff" font-weight="700">Deploy</text>
+        <text x="160" y="222" class="mk-muted" font-size="11.5" font-family="JetBrains Mono,monospace">Web app URL: https://script.google.com/macros/s/…/exec ⧉</text>
+      </g>
+    </svg>
+    <figcaption>הדגמה: חלון הפריסה. שתי ההגדרות המסומנות חייבות להיות בדיוק כך.</figcaption>
+  </figure>
+  <ol class="steps" start="4" style="counter-reset:s 3">
+    <li>חוזרים ל-Railway → <b>Variables</b> ומוסיפים:</li>
+  </ol>
+  <div class="code"><div class="bar"><span>Railway → Variables</span><button class="copy">העתק</button></div><pre>DRIVE_TOKEN_BRIDGE_URL=<span class="v" data-v="webapp"></span></pre></div>
+  <ol class="steps" start="5" style="counter-reset:s 4">
+    <li>אחרי שהשרת עולה מחדש, בודקים את החיבור לדרייב. התשובה אמורה להראות <code>ok</code> בחלק של הדרייב:
+      <div class="btns"><a class="btn primary" data-href="railwayDrive" target="_blank" rel="noopener">☁️ בדיקת גשר הדרייב <span class="ext">↗</span></a></div></li>
+    <li><b>בדיקה מקצה לקצה:</b> ממלאים את טופס ההורדות עם קישור ליוטיוב, מהמייל שנמצא ב"מאושרים". תוך עד 5 דקות יופיעו סטטוס בגיליון, מייל עם קישור, וקובץ בדרייב. 🎉
+      <div class="btns"><a class="btn" data-href="formShort" target="_blank" rel="noopener">📝 פתיחת טופס ההורדות <span class="ext">↗</span></a></div></li>
+  </ol>
+  <div class="callout warn"><b>🔁</b>חשוב מאוד: כשמשנים קוד בסקריפט בעתיד, מעדכנים דרך <b>Deploy → Manage deployments → ✏️ → Version: New version → Deploy</b>. כך הכתובת נשמרת. "New deployment" חדש יוצר כתובת חדשה, ואז צריך לעדכן אותה בכל המקומות.</div>
+</section>
+
+<!-- ============ STEP 6 ============ -->
+<section class="step" id="s6">
+  <div class="step-head"><div class="badge">6</div><div><h2>טופס חיפוש עם תוצאות במייל <span class="tag rec">מומלץ</span></h2><p class="sub">כ-10 דקות · המדריך המלא: <code>docs/UNIFIED_SEARCH_SETUP.md</code></p></div><label class="donebox"><input type="checkbox" data-done="s6">סיימתי</label></div>
+  <ol class="steps">
+    <li>יוצרים טופס חדש עם שתי שאלות:
+      <ul><li><b><code>מה לחפש?</code></b> <button class="cbtn" data-copy="מה לחפש?">⧉</button>: תשובה קצרה.</li>
+      <li><b><code>איפה לחפש?</code></b> <button class="cbtn" data-copy="איפה לחפש?">⧉</button>: תיבות סימון (המילה "איפה" חובה), עם האפשרויות:
+        <button class="cbtn" data-copy="יוטיוב">יוטיוב ⧉</button> <button class="cbtn" data-copy="מאקו">מאקו ⧉</button> <button class="cbtn" data-copy="כאן 11">כאן 11 ⧉</button></li></ul>
+      בהגדרות: <b>איסוף כתובות אימייל מאומתות</b>.
+      <div class="btns"><a class="btn primary" href="https://forms.new" target="_blank" rel="noopener">📝 טופס חדש <span class="ext">↗</span></a></div></li>
+    <li>בטופס: ⋮ → <b>Apps Script</b>. מדביקים את <code>apps-script/unified-search/קוד.js</code>, מחליפים את <code>appsscript.json</code>, ויוצרים קובץ HTML בשם <code>admin_dashboard</code> <button class="cbtn" data-copy="admin_dashboard">⧉</button> עם התוכן של <code>admin_dashboard.html</code>.</li>
+    <li>בראש הקובץ מחליפים את ההגדרות:</li>
+  </ol>
+  <div class="code"><div class="bar"><span>קוד.js · טופס החיפוש</span><button class="copy">העתק</button></div><pre>var FORM_ID = "<span class="v" data-v="searchFormId"></span>";
+
+var APPROVED_SHEET_ID = "<span class="v" data-v="sheetId"></span>";
+
+var SEARCH_SERVER_URL =
+  "<span class="v" data-v="railwaySearch"></span>";
+
+var KAN_EPISODES_URL =
+  "<span class="v" data-v="railwayEpisodes"></span>";
+
+var DOWNLOAD_FORM_BASE_URL =
+  "<span class="v" data-v="prefillBase"></span>";
+var DOWNLOAD_FORM_ENTRY_URL = "<span class="v" data-v="entryUrl"></span>";
+var DOWNLOAD_FORM_ENTRY_TYPE = "<span class="v" data-v="entryType"></span>";</pre></div>
+  <ol class="steps" start="4" style="counter-reset:s 3">
+    <li>⚙️ <b>Project Settings → Script Properties → Add script property</b>:</li>
+  </ol>
+  <div class="tw"><table><thead><tr><th>Property</th><th>Value</th></tr></thead><tbody>
+    <tr><td><span class="cell-copy"><span class="mono">API_KEY</span><button class="cbtn" data-copy="API_KEY">⧉</button></span></td><td><span class="cell-copy"><span class="mono v" data-v="searchKeyOrApi"></span><button class="cbtn" data-copyv="searchKeyOrApi">⧉</button></span></td></tr>
+  </tbody></table></div>
+  <ol class="steps" start="5" style="counter-reset:s 4">
+    <li>מריצים לפי הסדר:
+      <div class="btns"><button class="btn small" data-copy="checkSetup">1 · checkSetup ⧉</button><button class="btn small" data-copy="checkGmailApi">2 · checkGmailApi ⧉</button><button class="btn small" data-copy="fixTriggers">3 · fixTriggers ⧉</button><button class="btn small" data-copy="testSearchAndEmail">4 · testSearchAndEmail ⧉</button></div>
+      אחרי <code>testSearchAndEmail</code> יגיע מייל עם תוצאות אמיתיות וכפתורי הורדה.</li>
+  </ol>
+  <details class="acc"><summary>אופציונלי: עיצוב וחתימה במייל</summary><div>
+    <p>בראש הקובץ אפשר למלא את השדות האלה. כל שדה שנשאר ריק פשוט לא מוצג:</p>
+    <div class="code"><div class="bar"><span>קוד.js</span><button class="copy">העתק</button></div><pre>var LOGO_URL = "";          <span class="c">// תמונת רקע לכותרת המייל</span>
+var CREDIT_NAME = "";       <span class="c">// טקסט חתימה, למשל "פותח על ידי …"</span>
+var PROFILE_URL = "";       <span class="c">// קישור לאתר/פרופיל</span>
+var PROFILE_IMAGE_URL = ""; <span class="c">// תמונה עגולה ליד הכותרת</span></pre></div>
+  </div></details>
+  <details class="acc"><summary>לוח בקרה למנהל ופקודות במייל</summary><div>
+    <p>ראו את <code>docs/DASHBOARD_AND_EMAIL_COMMANDS.md</code>. הרכיב הזה דורש פריסת Web App גם לפרויקט של טופס החיפוש, ואז הרצה של <code>openDashboard</code>.</p>
+  </div></details>
+</section>
+
+<!-- ============ STEP 7 ============ -->
+<section class="step" id="s7">
+  <div class="step-head"><div class="badge">7</div><div><h2>תוספי דפדפן <span class="tag opt">אופציונלי</span></h2><p class="sub">כפתור "הורד לדרייב" ישירות ביוטיוב</p></div><label class="donebox"><input type="checkbox" data-done="s7">סיימתי</label></div>
+  <ol class="steps">
+    <li>מתקינים את Tampermonkey:<div class="btns"><a class="btn primary" href="https://www.tampermonkey.net/" target="_blank" rel="noopener">🐒 Tampermonkey <span class="ext">↗</span></a></div></li>
+    <li>Tampermonkey → <b>Create a new script</b> → מוחקים הכל → מדביקים את <code>userscripts/Download from YouTube to Drive.user.js</code>.</li>
+    <li>בראש הקובץ מחליפים את השורה:</li>
+  </ol>
+  <div class="code"><div class="bar"><span>Download from YouTube to Drive.user.js</span><button class="copy">העתק</button></div><pre>const WEB_APP_URL = "<span class="v" data-v="webapp"></span>";</pre></div>
+  <ol class="steps" start="4" style="counter-reset:s 3">
+    <li>שומרים, ונכנסים ליוטיוב: ליד הסרטון יופיע כפתור <b>Drive</b>. משתמש שנמצא ב"מאושרים" עובד מיד. משתמש אחר מקבל למייל קוד אימות בן 6 ספרות.</li>
+    <li>אותו דבר בדיוק עם <code>Gemini Images to Drive.user.js</code>, לשמירת תמונות מ-Gemini (ראו <code>docs/GEMINI_IMAGES_SETUP.md</code>).</li>
+  </ol>
+  <div class="callout info"><b>🎨</b>אפשר להחליף את תמונות הכפתורים ב-<code>BTN_MAIN_IMG</code>, ‏<code>BTN_VIDEO_IMG</code> ו-<code>BTN_AUDIO_IMG</code> (קישור ישיר לתמונה), ולמלא <code>ADMIN_EMAIL</code> כדי שיוצג למשתמשים בשגיאות.</div>
+</section>
+
+<!-- ============ STEP 8 ============ -->
+<section class="step" id="s8">
+  <div class="step-head"><div class="badge">8</div><div><h2>תוספות <span class="tag opt">אופציונלי</span></h2><p class="sub">כל רכיב עם מדריך מפורט משלו בתיקייה <code>docs/</code></p></div><label class="donebox"><input type="checkbox" data-done="s8">סיימתי</label></div>
+  <div class="cards">
+    <div class="card"><div class="ic">🇮🇱</div><h4>פרוקסי ישראלי לכאן 11</h4><p>כאן 11 חוסם שרתים מחו"ל. מגדירים <code>KAN_PROXY_URL</code>.<br><code>docs/IL_PROXY_GUIDE.md</code> · <code>proxy/</code></p></div>
+    <div class="card"><div class="ic">📺</div><h4>הורדת ערוצים שלמים</h4><p>מדביקים בטופס קישור לערוץ, וההורדה רצה ברקע.<br><code>docs/CHANNELS.md</code></p></div>
+    <div class="card"><div class="ic">🤖</div><h4>בוט טלגרם</h4><p>הורדות והקלטת שידור חי.<br><code>docs/TELEGRAM_BOT_SETUP.md</code></p><div class="btns"><a class="btn small" href="https://t.me/BotFather" target="_blank" rel="noopener">BotFather ↗</a></div></div>
+    <div class="card"><div class="ic">🎵</div><h4>שירים מטלגרם לדרייב</h4><p>כל שיר חדש בערוץ עולה לדרייב אוטומטית.<br><code>docs/TELEGRAM_CHANNEL_SETUP.md</code></p></div>
+    <div class="card"><div class="ic">🔍</div><h4>חיפוש יוטיוב נפרד</h4><p>שירות שני ב-Railway, עם Root Directory = <code>search-service</code>, וסקריפט ב-<code>apps-script/youtube-search/</code>.</p></div>
+    <div class="card"><div class="ic">📖</div><h4>כל נקודות הקצה</h4><p>תיעוד ה-API של השרת.<br><code>docs/API_GUIDE.md</code></p></div>
+  </div>
+  <h3>🎁 כפתור שליחה מגיטהאב (עוקף נטפרי)</h3>
+  <ol class="steps">
+    <li>במאגר: <b>Settings → Secrets and variables → Actions → New repository secret</b>, ומוסיפים שני סודות:</li>
+  </ol>
+  <div class="tw"><table><thead><tr><th>Name</th><th>Secret</th></tr></thead><tbody>
+    <tr><td><span class="cell-copy"><span class="mono">API_KEY</span><button class="cbtn" data-copy="API_KEY">⧉</button></span></td><td><span class="cell-copy"><span class="mono v" data-v="apiKey"></span><button class="cbtn" data-copyv="apiKey">⧉</button></span></td></tr>
+    <tr><td><span class="cell-copy"><span class="mono">DOWNLOAD_SERVICE_URL</span><button class="cbtn" data-copy="DOWNLOAD_SERVICE_URL">⧉</button></span></td><td><span class="cell-copy"><span class="mono v" data-v="railwayBase"></span><button class="cbtn" data-copyv="railwayBase">⧉</button></span></td></tr>
+  </tbody></table></div>
+  <ol class="steps" start="2" style="counter-reset:s 1"><li><b>Actions → Send download request → Run workflow</b>. בוחרים פעולה, מדביקים קישור, ומקבלים את קישורי הדרייב בסיכום הריצה.</li></ol>
+</section>
+
+<!-- ============ CHECKLIST ============ -->
+<section class="step" id="checklist">
+  <div class="step-head"><div class="badge">✓</div><div><h2>רשימת ערכים: מה הולך לאן</h2><p class="sub">מתעדכנת לפי הפאנל. אדום = עדיין חסר.</p></div></div>
+  <div class="tw"><table>
+    <thead><tr><th>ערך</th><th>הערך שלך</th><th>איפה מזינים</th></tr></thead>
+    <tbody>
+      <tr><td>API_KEY</td><td class="mono v" data-v="apiKey"></td><td>Railway · <code>Code.gs</code> · סוד בגיטהאב</td></tr>
+      <tr><td>UNIFIED_SEARCH_KEY</td><td class="mono v" data-v="searchKey"></td><td>Railway · Script Properties של טופס החיפוש</td></tr>
+      <tr><td>כתובת השרת</td><td class="mono v" data-v="railwayBase"></td><td><code>Code.gs</code> (‎/download) · קוד.js של החיפוש (‎/search, ‎/episodes)</td></tr>
+      <tr><td>FORM_ID</td><td class="mono v" data-v="formId"></td><td><code>Code.gs</code></td></tr>
+      <tr><td>FORM_URL</td><td class="mono v" data-v="formShort"></td><td><code>Code.gs</code></td></tr>
+      <tr><td>מזהה הגיליון</td><td class="mono v" data-v="sheetId"></td><td>קוד.js של החיפוש · <code>APPROVED_SHEET_ID</code> לבוט טלגרם</td></tr>
+      <tr><td>בסיס המילוי מראש</td><td class="mono v" data-v="prefillBase"></td><td>קוד.js של החיפוש</td></tr>
+      <tr><td>entry של הקישור / הסוג</td><td class="mono"><span class="v" data-v="entryUrl"></span> · <span class="v" data-v="entryType"></span></td><td>קוד.js של החיפוש</td></tr>
+      <tr><td>Web App URL</td><td class="mono v" data-v="webapp"></td><td>Railway (<code>DRIVE_TOKEN_BRIDGE_URL</code>) · שני תוספי הדפדפן</td></tr>
+      <tr><td>FORM_ID של החיפוש</td><td class="mono v" data-v="searchFormId"></td><td>קוד.js של החיפוש</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout ok"><b>🔎</b>בדיקה אחרונה: מחפשים בכל קובץ שהודבק את <code>YOUR_</code>, ‏<code>YOUR-</code> ו-<code>CHANGE_ME</code>. אם לא נשאר אף אחד, הכל מולא.</div>
+</section>
+
+<!-- ============ TROUBLE ============ -->
+<section class="step" id="trouble">
+  <div class="step-head"><div class="badge">?</div><div><h2>פתרון בעיות</h2><p class="sub">התקלות הנפוצות ומה בודקים</p></div></div>
+  <details class="acc"><summary>השרת מחזיר <code>unauthorized</code></summary><div><p><code>API_KEY</code> ב-Railway וב-<code>Code.gs</code> חייבים להיות זהים לגמרי, בלי רווח בהתחלה או בסוף. אחרי שינוי ב-Railway, ממתינים שהשרת יעלה מחדש.</p></div></details>
+  <details class="acc"><summary>שגיאת דרייב / <code>invalid_grant</code> / "גשר הטוקנים"</summary><div><p>בודקים ש-<code>DRIVE_TOKEN_BRIDGE_URL</code> זהה לכתובת ה-Web App, שהפריסה היא "Execute as: Me" ו-"Anyone", ושהערך של <code>API_KEY</code> זהה בשני הצדדים. בדיקה: <a data-href="railwayDrive" target="_blank" rel="noopener">‎/?drive=1</a>.</p></div></details>
+  <details class="acc"><summary>הטופס לא מעובד, והסטטוס בגיליון לא מתעדכן</summary><div><p>הלשוניות חייבות להיקרא בדיוק <code>תגובות לטופס 1</code> ו-<code>מאושרים</code>. מריצים <code>__הצג_טריגרים_פעילים</code> כדי לוודא שיש טריגרים, ואם צריך מריצים שוב <code>__התקן_טריגר_סריקת_ערוצים</code>. בטבלת התשובות צריכות להיות בדיוק 3 עמודות אחרי חותמת הזמן.</p></div></details>
+  <details class="acc"><summary>"לא מאושר" או "נגמרה המכסה"</summary><div><p>המייל שבטופס צריך להיות זהה למה שכתוב בעמודה A של "מאושרים". בעמודה B צריכה להיות מכסה (מספר או <code>ללא הגבלה</code>), או מכסה יומית בעמודה C.</p></div></details>
+  <details class="acc"><summary>מיילים לא מגיעים</summary><div><p>מריצים <code>__בדוק_שליחת_מייל</code> ובודקים בתיקיית הספאם. בלי Gmail API המכסה היא 100 מיילים ביום (ראו את ההרחבה בשלב 4).</p></div></details>
+  <details class="acc"><summary>הורדות מכאן 11 נכשלות</summary><div><p>כאן 11 חוסם כתובות שאינן ישראליות. צריך פרוקסי ישראלי ולהגדיר <code>KAN_PROXY_URL</code> (ראו <code>docs/IL_PROXY_GUIDE.md</code>).</p></div></details>
+  <details class="acc"><summary>יוטיוב: "Sign in to confirm you're not a bot"</summary><div><p>השרת מייצר PO Token לבד. אם התקלה חוזרת, מגדירים <code>YOUTUBE_COOKIES</code> ב-Railway.</p></div></details>
+  <details class="acc"><summary>שיניתי קוד בסקריפט ושום דבר לא השתנה</summary><div><p>צריך לעדכן את הפריסה: <b>Deploy → Manage deployments → ✏️ → New version → Deploy</b>.</p></div></details>
+  <details class="acc"><summary>איפה רואים לוגים?</summary><div><p><b>שרת:</b> Railway → השירות → Deployments → View logs.<br><b>סקריפט:</b> Apps Script → Executions (☰ בצד), או יומן ההרצה בתחתית העורך.</p></div></details>
+</section>
+
+<footer>מדריך הקמה · מערכת הורדות לדרייב · הערכים שמילאתם נשמרים רק בדפדפן הזה</footer>
+</main>
+</div>
+
+<div class="toast" id="toast">הועתק ✓</div>
+
+<script>
+(function(){
+  "use strict";
+  var LS = "ytdrive-guide-v1";
+  var store = {};
+  try { store = JSON.parse(localStorage.getItem(LS) || "{}") || {}; } catch (e) { store = {}; }
+  store.vals = store.vals || {}; store.done = store.done || {};
+  function save(){ try { localStorage.setItem(LS, JSON.stringify(store)); } catch (e) {} }
+
+  var FIELDS = ["apiKey","searchKey","railway","form","formShort","prefill","sheet","webapp","searchForm","folder"];
+  var PH = {
+    apiKey:"CHANGE_ME_API_KEY", searchKey:"CHANGE_ME_SEARCH_KEY",
+    railwayBase:"https://YOUR-DOWNLOAD-SERVICE.up.railway.app",
+    railwayDownload:"https://YOUR-DOWNLOAD-SERVICE.up.railway.app/download",
+    railwaySearch:"https://YOUR-DOWNLOAD-SERVICE.up.railway.app/search",
+    railwayEpisodes:"https://YOUR-DOWNLOAD-SERVICE.up.railway.app/episodes",
+    formId:"YOUR_DOWNLOAD_FORM_ID", formShort:"https://forms.gle/YOUR_DOWNLOAD_FORM_SHORT_LINK",
+    prefillBase:"https://docs.google.com/forms/d/e/YOUR_DOWNLOAD_FORM_PUBLIC_ID/viewform",
+    entryUrl:"entry.YOUR_URL_FIELD_ENTRY_ID", entryType:"entry.YOUR_TYPE_FIELD_ENTRY_ID",
+    sheetId:"YOUR_DOWNLOADS_SPREADSHEET_ID", webapp:"https://script.google.com/macros/s/YOUR_WEB_APP_DEPLOYMENT_ID/exec",
+    searchFormId:"YOUR_UNIFIED_SEARCH_FORM_ID", folderId:"(ריק)", searchKeyOrApi:"CHANGE_ME_SEARCH_KEY"
+  };
+
+  function idFrom(s, re){ s = (s||"").trim(); if (!s) return ""; var m = s.match(re); if (m) return m[1]; return /^[\w-]{15,}$/.test(s) ? s : ""; }
+  function baseUrl(s){ s = (s||"").trim().replace(/\/+$/,""); if (!s) return ""; if (!/^https?:\/\//i.test(s)) s = "https://" + s; return s.replace(/\/(download|search|episodes)$/i,""); }
+
+  function derive(){
+    var v = store.vals, d = {};
+    d.apiKey = (v.apiKey||"").trim();
+    d.searchKey = (v.searchKey||"").trim();
+    d.searchKeyOrApi = d.searchKey || d.apiKey;
+    var b = baseUrl(v.railway);
+    d.railwayBase = b; d.railwayDownload = b ? b + "/download" : ""; d.railwaySearch = b ? b + "/search" : ""; d.railwayEpisodes = b ? b + "/episodes" : "";
+    d.formId = idFrom(v.form, /\/forms\/d\/(?!e\/)([\w-]+)/);
+    d.formShort = (v.formShort||"").trim();
+    d.sheetId = idFrom(v.sheet, /\/spreadsheets\/d\/([\w-]+)/);
+    d.searchFormId = idFrom(v.searchForm, /\/forms\/d\/(?!e\/)([\w-]+)/);
+    d.folderId = idFrom(v.folder, /\/folders\/([\w-]+)/);
+    d.webapp = (v.webapp||"").trim();
+    var p = (v.prefill||"").trim();
+    d.prefillBase = ""; d.entryUrl = ""; d.entryType = "";
+    if (p){
+      var bm = p.match(/^(https:\/\/docs\.google\.com\/forms\/d\/e\/[\w-]+\/viewform)/);
+      if (bm) d.prefillBase = bm[1];
+      var entries = []; var re = /(entry\.\d+)=([^&]*)/g, m;
+      while ((m = re.exec(p))) { var val = ""; try { val = decodeURIComponent(m[2].replace(/\+/g," ")); } catch(e){ val = m[2]; } entries.push([m[1], val]); }
+      entries.forEach(function(e){ if (/^AAA$/i.test(e[1].trim())) d.entryUrl = e[0]; else if (/וידאו|אודיו/.test(e[1])) d.entryType = e[0]; });
+      if (!d.entryUrl && entries[0]) d.entryUrl = entries[0][0];
+      if (!d.entryType && entries[1]) d.entryType = entries[1][0];
+    }
+    d.railwayRoot = b ? b + "/" : ""; d.railwayDrive = b ? b + "/?drive=1" : ""; d.sheetUrl = (v.sheet||"").trim();
+    return d;
+  }
+
+  function render(){
+    var d = derive();
+    document.querySelectorAll("[data-v]").forEach(function(el){
+      var k = el.getAttribute("data-v"); var val = d[k];
+      el.textContent = val || PH[k] || "";
+      el.classList.toggle("empty", !val);
+    });
+    document.querySelectorAll("[data-href]").forEach(function(a){
+      var k = a.getAttribute("data-href"); var val = d[k];
+      if (val) { a.href = val; a.style.opacity = ""; a.removeAttribute("aria-disabled"); a.title = ""; }
+      else { a.removeAttribute("href"); a.style.opacity = ".5"; a.setAttribute("aria-disabled","true"); a.title = "קודם צריך למלא את הערך בפאנל"; }
+    });
+    function setD(id, html){ var el = document.getElementById(id); if (el) el.innerHTML = html; }
+    var esc = function(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); };
+    setD("d-railway", d.railwayBase ? "✓ <b>" + esc(d.railwayDownload) + "</b>" : "");
+    setD("d-form", store.vals.form ? (d.formId ? "FORM_ID: <b>" + esc(d.formId) + "</b>" : "⚠ לא זוהה מזהה. צריך קישור עריכה (…/forms/d/…/edit)") : "");
+    setD("d-sheet", store.vals.sheet ? (d.sheetId ? "SHEET_ID: <b>" + esc(d.sheetId) + "</b>" : "⚠ לא זוהה מזהה גיליון") : "");
+    setD("d-searchForm", store.vals.searchForm ? (d.searchFormId ? "FORM_ID: <b>" + esc(d.searchFormId) + "</b>" : "⚠ לא זוהה מזהה") : "");
+    setD("d-folder", store.vals.folder ? (d.folderId ? "FOLDER_ID: <b>" + esc(d.folderId) + "</b>" : "⚠ לא זוהה מזהה תיקייה") : "");
+    setD("d-prefill", store.vals.prefill ? ((d.prefillBase ? "BASE ✓ " : "⚠ BASE ✗ ") + "· URL: <b>" + esc(d.entryUrl || "?") + "</b> · TYPE: <b>" + esc(d.entryType || "?") + "</b>") : "");
+    FIELDS.forEach(function(f){ var box = document.querySelector('.field[data-f="'+f+'"]'); if (box) box.classList.toggle("filled", !!(store.vals[f]||"").trim()); });
+  }
+
+  FIELDS.forEach(function(f){
+    var inp = document.getElementById("f-" + f); if (!inp) return;
+    inp.value = store.vals[f] || "";
+    inp.addEventListener("input", function(){ store.vals[f] = inp.value; save(); render(); });
+  });
+
+  function genKey(n){
+    var chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789", out = "", arr = new Uint32Array(n);
+    (window.crypto || window.msCrypto).getRandomValues(arr);
+    for (var i = 0; i < n; i++) out += chars[arr[i] % chars.length];
+    return out;
+  }
+  document.querySelectorAll("[data-gen]").forEach(function(b){
+    b.addEventListener("click", function(){
+      var f = b.getAttribute("data-gen"), inp = document.getElementById("f-" + f);
+      if (inp.value && !confirm("להחליף את המפתח הקיים במפתח חדש?")) return;
+      inp.value = genKey(32); store.vals[f] = inp.value; save(); render();
+    });
+  });
+  document.getElementById("clearVals").addEventListener("click", function(){
+    if (!confirm("למחוק את כל הערכים שמילאת?")) return;
+    store.vals = {}; save(); FIELDS.forEach(function(f){ var i = document.getElementById("f-"+f); if (i) i.value = ""; }); render();
+  });
+
+  // copy
+  var toast = document.getElementById("toast"), tt;
+  function showToast(msg){ toast.textContent = msg || "הועתק ✓"; toast.classList.add("show"); clearTimeout(tt); tt = setTimeout(function(){ toast.classList.remove("show"); }, 1400); }
+  function copyText(text, btn){
+    function ok(){ showToast(); if (btn){ btn.classList.add("ok"); setTimeout(function(){ btn.classList.remove("ok"); }, 1200); } }
+    if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(text).then(ok, fallback); } else fallback();
+    function fallback(){ var ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); ok(); } catch(e){ showToast("לא הצלחתי להעתיק"); } document.body.removeChild(ta); }
+  }
+  document.querySelectorAll(".code .copy").forEach(function(b){
+    b.addEventListener("click", function(){ copyText(b.closest(".code").querySelector("pre").innerText, b); });
+  });
+  document.querySelectorAll("[data-copy]").forEach(function(b){ b.addEventListener("click", function(){ copyText(b.getAttribute("data-copy"), b); }); });
+  document.querySelectorAll("[data-copyv]").forEach(function(b){
+    b.addEventListener("click", function(){ var d = derive(), k = b.getAttribute("data-copyv"); if (!d[k]) { showToast("קודם צריך למלא את הערך בפאנל למעלה"); return; } copyText(d[k], b); });
+  });
+
+  // done tracking
+  var stepIds = ["s1","s2","s3","s4","s5","s6","s7","s8"];
+  function renderDone(){
+    var n = 0;
+    stepIds.forEach(function(id){
+      var on = !!store.done[id]; if (on) n++;
+      var sec = document.getElementById(id); if (sec) sec.classList.toggle("done", on);
+      var a = document.querySelector('nav.toc a[data-step="'+id+'"]'); if (a) a.classList.toggle("done", on);
+      var cb = document.querySelector('[data-done="'+id+'"]'); if (cb) cb.checked = on;
+    });
+    var pct = Math.round(n / stepIds.length * 100);
+    document.getElementById("pbar").style.width = pct + "%";
+    document.getElementById("ptext").textContent = pct + "%";
+  }
+  document.querySelectorAll("[data-done]").forEach(function(cb){
+    cb.addEventListener("change", function(){ store.done[cb.getAttribute("data-done")] = cb.checked; save(); renderDone(); });
+  });
+
+  // active toc
+  var links = Array.prototype.slice.call(document.querySelectorAll("nav.toc a"));
+  var secs = links.map(function(a){ return document.querySelector(a.getAttribute("href")); });
+  if ("IntersectionObserver" in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ if (en.isIntersecting){ var i = secs.indexOf(en.target); links.forEach(function(l){ l.classList.remove("active"); }); if (links[i]) links[i].classList.add("active"); } });
+    }, { rootMargin: "-30% 0px -60% 0px" });
+    secs.forEach(function(s){ if (s) io.observe(s); });
+  }
+
+  // mobile menu
+  var toc = document.getElementById("toc");
+  document.getElementById("menuBtn").addEventListener("click", function(){ toc.classList.toggle("open"); });
+  links.forEach(function(a){ a.addEventListener("click", function(){ toc.classList.remove("open"); }); });
+
+  // theme
+  var root = document.documentElement;
+  if (store.theme) root.setAttribute("data-theme", store.theme);
+  document.getElementById("themeBtn").addEventListener("click", function(){
+    var dark = root.getAttribute("data-theme") ? root.getAttribute("data-theme") === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    store.theme = dark ? "light" : "dark"; root.setAttribute("data-theme", store.theme); save();
+  });
+
+  render(); renderDone();
+})();
+</script>
+</body>
+</html>

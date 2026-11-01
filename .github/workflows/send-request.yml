@@ -1,0 +1,230 @@
+name: Send download request
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'מה לבצע?'
+        required: true
+        default: 'download'
+        type: choice
+        options:
+          - download
+          - episodes
+          - search
+          - health
+      url:
+        description: 'קישור (פרק/עונה/סרטון/ערוץ)'
+        required: false
+        default: 'https://www.kan.org.il/content/kan/kan-11/p-11843/s8/'
+      format:
+        description: 'פורמט'
+        required: true
+        default: 'video'
+        type: choice
+        options:
+          - video
+          - audio
+      episode:
+        description: 'פרק בודד: מזהה (756427) או מספר סידורי. ריק = כל העונה'
+        required: false
+        default: ''
+      season:
+        description: 'מספר עונה (למאקו בלבד)'
+        required: false
+        default: ''
+      all_episodes:
+        description: 'עונה שלמה כעבודת רקע (מומלץ)?'
+        required: true
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      poll:
+        description: 'לעקוב אחרי ההורדה עד לסיום?'
+        required: true
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Resolve server URL
+        run: |
+          # כתובת השרת נשמרת כ-Secret בשם DOWNLOAD_SERVICE_URL (בלי / בסוף)
+          echo "BASE_URL=${{ secrets.DOWNLOAD_SERVICE_URL }}" >> $GITHUB_ENV
+
+      - name: Unified search
+        if: ${{ github.event.inputs.action == 'search' }}
+        run: |
+          BODY=$(jq -n \
+            --arg q "${{ github.event.inputs.url }}" \
+            '{query: $q, sources: ["youtube", "mako", "kan"], limit: 6}')
+
+          echo "Search: $BODY"
+
+          RESPONSE=$(curl -s --max-time 300 -X POST "$BASE_URL/search" \
+            -H "Content-Type: application/json" \
+            -H "X-API-KEY: ${{ secrets.API_KEY }}" \
+            -d "$BODY" \
+            -w "\nHTTP:%{http_code}")
+
+          echo "$RESPONSE" | tail -1
+          echo "$RESPONSE" | sed '$d' | python3 -m json.tool 2>/dev/null || echo "$RESPONSE"
+
+      - name: Health check
+        if: ${{ github.event.inputs.action == 'health' }}
+        run: |
+          echo "=== GET $BASE_URL/ ==="
+          curl -s --max-time 30 "$BASE_URL/" | python3 -m json.tool
+
+      - name: Episodes list
+        if: ${{ github.event.inputs.action == 'episodes' }}
+        run: |
+          BODY=$(jq -n \
+            --arg url "${{ github.event.inputs.url }}" \
+            --arg season "${{ github.event.inputs.season }}" \
+            '{url: $url,
+              season: (if $season == "" then null else ($season | tonumber) end)}')
+
+          echo "Request: $BODY"
+
+          RESPONSE=$(curl -s --max-time 420 -X POST "$BASE_URL/episodes" \
+            -H "Content-Type: application/json" \
+            -H "X-API-KEY: ${{ secrets.API_KEY }}" \
+            -d "$BODY" \
+            -w "\nHTTP:%{http_code}")
+
+          echo "$RESPONSE" | tail -1
+          echo "$RESPONSE" | sed '$d' | python3 -m json.tool 2>/dev/null || echo "$RESPONSE"
+
+      - name: Send download request
+        if: ${{ github.event.inputs.action == 'download' }}
+        run: |
+          BODY=$(jq -n \
+            --arg url "${{ github.event.inputs.url }}" \
+            --arg fmt "${{ github.event.inputs.format }}" \
+            --arg ep "${{ github.event.inputs.episode }}" \
+            --arg season "${{ github.event.inputs.season }}" \
+            --argjson all "${{ github.event.inputs.all_episodes }}" \
+            '{url: $url, format: $fmt,
+              episode: (if $ep == "" then null else (try ($ep | tonumber) catch $ep) end),
+              season: (if $season == "" then null else ($season | tonumber) end),
+              all_episodes: $all}')
+
+          echo "Request: $BODY"
+
+          curl -s --max-time 900 -X POST "$BASE_URL/download" \
+            -H "Content-Type: application/json" \
+            -H "X-API-KEY: ${{ secrets.API_KEY }}" \
+            -d "$BODY" \
+            -o response.json \
+            -w "HTTP Status: %{http_code}\n"
+
+          echo "===== RESPONSE ====="
+          python3 -m json.tool response.json 2>/dev/null || cat response.json
+          echo "===================="
+
+      - name: Poll job until finished
+        if: ${{ github.event.inputs.action == 'download' && github.event.inputs.poll == 'true' }}
+        run: |
+          JOB_ID=$(python3 -c "
+          import json
+          try:
+              data = json.load(open('response.json'))
+          except Exception:
+              data = {}
+          print(data.get('jobId') or '')
+          ")
+
+          if [ -z "$JOB_ID" ]; then
+            echo "אין jobId - ההורדה הסתיימה סינכרונית (מוצג למעלה)."
+            exit 0
+          fi
+
+          echo "עבודה: $JOB_ID"
+
+          for i in $(seq 1 150); do
+
+            curl -s "$BASE_URL/job/$JOB_ID" \
+              -H "X-API-KEY: ${{ secrets.API_KEY }}" \
+              -o status.json
+
+            STATE=$(python3 -c "
+          import json
+          try:
+              d = json.load(open('status.json'))
+          except Exception:
+              print(''); raise SystemExit
+          print(d.get('status', ''))
+          ")
+
+            python3 -c "
+          import json
+          try:
+              d = json.load(open('status.json'))
+          except Exception:
+              raise SystemExit
+          print('[%s] %s/%s ok=%s failed=%s %s' % (
+              d.get('status'), d.get('processed', 0), d.get('total', 0),
+              d.get('done', 0), d.get('failed', 0),
+              d.get('current') or ''))
+          "
+
+            case "$STATE" in
+              done|error|cancelled)
+                echo "===== FINAL ====="
+                curl -s "$BASE_URL/job/$JOB_ID" \
+                  -H "X-API-KEY: ${{ secrets.API_KEY }}" \
+                  | python3 -m json.tool
+
+                python3 << 'PYEOF'
+          import json
+
+          try:
+              d = json.load(open('status.json'))
+          except Exception:
+              raise SystemExit
+
+          lines = ["## תוצאות ההורדה", ""]
+          folder = d.get("folderLink")
+          if folder:
+              lines.append(f"📁 [תיקיית הדרייב]({folder})")
+              lines.append("")
+
+          for item in d.get("items") or []:
+              title = item.get("title") or item.get("id") or "פרק"
+              link = item.get("driveLink")
+              status = item.get("status", "?")
+              if link:
+                  lines.append(f"- ✅ [{title}]({link})")
+              else:
+                  reason = item.get("reason") or ""
+                  lines.append(f"- ❌ {title} ({status}) {reason}".rstrip())
+
+          with open("summary.md", "w", encoding="utf-8") as f:
+              f.write("\n".join(lines))
+          PYEOF
+
+                if [ -f summary.md ]; then
+                  cat summary.md >> $GITHUB_STEP_SUMMARY
+                  echo ""
+                  echo "===== קישורי דרייב ====="
+                  grep -o 'https://drive.google.com[^")]*' summary.md || true
+                fi
+                exit 0
+                ;;
+            esac
+
+            sleep 20
+          done
+
+          echo "::error::העבודה לא הסתיימה בזמן המוקצב - בדוק ידנית: $BASE_URL/job/$JOB_ID"
+          exit 1

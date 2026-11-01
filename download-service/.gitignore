@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+
+# סשן טלגרם - גישה מלאה לחשבון, לעולם לא בגיט
+*.session
+*.session-journal

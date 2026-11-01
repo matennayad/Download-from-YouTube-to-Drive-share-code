@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>לוח בקרה — שירות ההורדות</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f4f6fb;
+      color: #1c2333;
+      padding: 16px;
+    }
+    .header {
+      background: linear-gradient(90deg,#ff2a2a 0%,#ff2aa8 35%,#2a6bff 70%,#00d4ff 100%);
+      border-radius: 14px;
+      padding: 18px 20px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .header h1 { font-size: 20px; font-weight: 700; }
+    .header .who { font-size: 12px; opacity: .85; }
+    .card {
+      background: #fff;
+      border: 1px solid #e3e8f2;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 3px rgba(28,35,51,.05);
+    }
+    .card h2 { font-size: 15px; margin-bottom: 10px; color: #2a3550; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #eef1f8;
+      color: #46506b;
+    }
+    .pill.ok { background: #e2f7e9; color: #14743b; }
+    .pill.bad { background: #fde5e5; color: #a32323; }
+    .pill.busy { background: #fff3d6; color: #8a6100; }
+    button {
+      border: 0;
+      border-radius: 9px;
+      padding: 9px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #2a6bff;
+      color: #fff;
+    }
+    button.secondary { background: #eef1f8; color: #2a3550; }
+    button.danger { background: #e5484d; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    input[type="number"], input[type="text"], select {
+      border: 1px solid #d5dbea;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 14px;
+      width: 110px;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: right; color: #6b7691; font-size: 12px; padding: 6px 8px; border-bottom: 1px solid #e3e8f2; }
+    td { padding: 7px 8px; border-bottom: 1px solid #f0f3fa; }
+    tr:hover td { background: #f8faff; }
+    .muted { color: #8a94ac; font-size: 12px; }
+    .msg { font-size: 13px; padding: 8px 12px; border-radius: 8px; margin-top: 10px; display: none; }
+    .msg.ok { display: block; background: #e2f7e9; color: #14743b; }
+    .msg.err { display: block; background: #fde5e5; color: #a32323; }
+    .spin { display: inline-block; animation: r 1s linear infinite; }
+    @keyframes r { to { transform: rotate(360deg); } }
+    a { color: #2a6bff; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>🎛️ לוח בקרה — שירות ההורדות</h1>
+    <div class="who" id="whoami"></div>
+  </div>
+
+  <div class="card">
+    <h2>מצב השרת</h2>
+    <div class="row" id="serverState"><span class="muted">טוען…</span></div>
+    <div class="muted" id="serverTime" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card">
+    <h2>🔴 הקלטת שידור חי</h2>
+    <div id="recordState" class="row" style="margin-bottom:12px"><span class="muted">טוען…</span></div>
+    <div class="row">
+      <label>ערוץ:
+        <select id="recChannel"><option value="12">קשת 12</option></select>
+      </label>
+      <label>דקות: <input type="number" id="recMinutes" value="60" min="1" max="180"></label>
+      <label>לשתף עם (מייל, אופציונלי): <input type="text" id="recEmail" style="width:200px" dir="ltr"></label>
+      <button id="btnStart" onclick="startRecord()">🔴 התחל הקלטה</button>
+      <button id="btnStop" class="danger" onclick="stopRecord()">⏹ עצור והעלה</button>
+    </div>
+    <div id="recMsg" class="msg"></div>
+    <div class="muted" style="margin-top:8px">
+      הקלטה אחת בכל פעם • הקובץ עולה לתיקיית "הקלטות" ב-Drive • קשת 12 עובדת כל עוד אין DRM
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 עבודות אחרונות</h2>
+    <div id="jobsState"><span class="muted">טוען…</span></div>
+  </div>
+
+  <script>
+    var SERVER = "https://YOUR-DOWNLOAD-SERVICE.up.railway.app";
+
+    function esc(s) {
+      return String(s == null ? "" : s)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function showMsg(id, text, ok) {
+      var el = document.getElementById(id);
+      el.textContent = text;
+      el.className = "msg " + (ok ? "ok" : "err");
+    }
+
+    // ---------- טעינה ----------
+
+    function loadServer() {
+      var el = document.getElementById("serverState");
+      el.innerHTML = '<span class="spin">⏳</span> בודק…';
+      google.script.run
+        .withSuccessHandler(function (r) {
+          var html = "";
+          if (r && r.reachable) {
+            html += '<span class="pill ok">✅ השרת חי</span>';
+            if (r.drive === "ok") html += '<span class="pill ok">Drive תקין</span>';
+            else html += '<span class="pill bad">Drive: תקלה</span>';
+            if (r.recording && r.recording.state === "recording")
+              html += '<span class="pill busy">🔴 מקליט ' + esc(r.recording.channel) + "</span>";
+          } else {
+            html += '<span class="pill bad">❌ השרת לא מגיב</span>';
+            if (r && r.error) html += '<span class="muted">' + esc(r.error) + "</span>";
+          }
+          el.innerHTML = html;
+          document.getElementById("serverTime").textContent =
+            r && r.time ? "נבדק: " + r.time : "";
+        })
+        .withFailureHandler(function (e) {
+          el.innerHTML = '<span class="pill bad">שגיאה: ' + esc(e.message) + "</span>";
+        })
+        .getServerStatus();
+    }
+
+    function loadJobs() {
+      var el = document.getElementById("jobsState");
+      google.script.run
+        .withSuccessHandler(function (r) {
+          if (!r || !r.success || !(r.jobs || []).length) {
+            el.innerHTML = '<span class="muted">אין עבודות שמורות (או שהשרת עוד לא הריץ כלום).</span>';
+            return;
+          }
+          var rows = r.jobs.map(function (j) {
+            var st = j.status === "done" || j.status === "completed"
+              ? "ok" : (j.status === "failed" || j.status === "error" ? "bad" : "busy");
+            var stTxt = j.status === "running" ? "רץ" :
+              (j.status === "done" || j.status === "completed") ? "הסתיים" :
+              (j.status === "failed" || j.status === "error") ? "נכשל" :
+              (j.status === "cancelled" || j.status === "canceled") ? "בוטל" :
+              esc(j.status);
+            var when = j.updated_at
+              ? new Date(j.updated_at * 1000).toLocaleString("he-IL")
+              : "";
+            var pct = j.total ? Math.round((j.done / j.total) * 100) : 0;
+            return "<tr>" +
+              '<td><span class="pill ' + st + '">' + stTxt + "</span></td>" +
+              "<td>" + esc((j.channel || j.url || "").slice(0, 70)) + "</td>" +
+              "<td>" + (j.kind === "season" ? "עונה" : j.kind === "channel" ? "ערוץ" : "בודד") + "</td>" +
+              "<td>" + (j.done || 0) + "/" + (j.total || 0) + " (" + pct + "%)</td>" +
+              "<td>" + esc(when) + "</td>" +
+              "</tr>";
+          });
+          el.innerHTML =
+            "<table><tr><th>מצב</th><th>יעד</th><th>סוג</th><th>התקדמות</th><th>עודכן</th></tr>" +
+            rows.join("") + "</table>";
+        })
+        .withFailureHandler(function (e) {
+          el.innerHTML = '<span class="muted">טעינת העבודות נכשלה: ' + esc(e.message) + "</span>";
+        })
+        .getRecentJobs();
+    }
+
+    function loadRecord() {
+      var el = document.getElementById("recordState");
+      google.script.run
+        .withSuccessHandler(function (r) {
+          var html = "";
+          if (r && r.success) {
+            var cur = r.current;
+            if (cur && (cur.state === "recording" || cur.state === "starting")) {
+              html += '<span class="pill busy">🔴 מקליט ערוץ ' + esc(cur.channel) +
+                " — " + (cur.elapsed_minutes || 0) + " מתוך " + esc(cur.minutes) + " דקות</span>";
+              document.getElementById("btnStart").disabled = true;
+              document.getElementById("btnStop").disabled = false;
+            } else if (cur && cur.state === "uploading") {
+              html += '<span class="pill busy">⬆️ מעלה ל-Drive…</span>';
+              document.getElementById("btnStart").disabled = true;
+              document.getElementById("btnStop").disabled = true;
+            } else if (cur && cur.state === "done") {
+              html += '<span class="pill ok">הקלטה אחרונה הועלתה ✅</span>';
+              if (cur.driveLink) html += ' <a target="_top" href="' + esc(cur.driveLink) + '">פתח ב-Drive</a>';
+              document.getElementById("btnStart").disabled = false;
+              document.getElementById("btnStop").disabled = true;
+            } else if (cur && cur.state === "failed") {
+              html += '<span class="pill bad">הקלטה אחרונה נכשלה: ' + esc(cur.error || "?") + "</span>";
+              document.getElementById("btnStart").disabled = false;
+              document.getElementById("btnStop").disabled = true;
+            } else {
+              html += '<span class="pill">אין הקלטה פעילה</span>';
+              document.getElementById("btnStart").disabled = false;
+              document.getElementById("btnStop").disabled = true;
+            }
+          } else {
+            html = '<span class="pill bad">לא ניתן לקרוא מצב הקלטות</span>';
+          }
+          el.innerHTML = html;
+        })
+        .withFailureHandler(function (e) {
+          el.innerHTML = '<span class="pill bad">' + esc(e.message) + "</span>";
+        })
+        .getRecordStatus();
+    }
+
+    // ---------- פעולות ----------
+
+    function startRecord() {
+      var minutes = parseInt(document.getElementById("recMinutes").value, 10) || 60;
+      var email = document.getElementById("recEmail").value.trim();
+      var channel = document.getElementById("recChannel").value;
+      if (minutes < 1 || minutes > 180) {
+        showMsg("recMsg", "דקות חייבות להיות בין 1 ל-180", false);
+        return;
+      }
+      var btn = document.getElementById("btnStart");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spin">⏳</span> מתחיל…';
+      google.script.run
+        .withSuccessHandler(function (r) {
+          btn.innerHTML = "🔴 התחל הקלטה";
+          if (r && r.success) {
+            showMsg("recMsg", "ההקלטה התחילה! (" + r.recording.minutes + " דקות)", true);
+          } else {
+            showMsg("recMsg", "ההתחלה נכשלה: " + ((r && r.error) || "?"), false);
+          }
+          loadRecord();
+        })
+        .withFailureHandler(function (e) {
+          btn.innerHTML = "🔴 התחל הקלטה";
+          showMsg("recMsg", "שגיאה: " + e.message, false);
+        })
+        .startRecording(channel, minutes, email);
+    }
+
+    function stopRecord() {
+      var btn = document.getElementById("btnStop");
+      btn.disabled = true;
+      btn.innerHTML = "⏹ עוצר…";
+      google.script.run
+        .withSuccessHandler(function (r) {
+          btn.innerHTML = "⏹ עצור והעלה";
+          if (r && r.success) {
+            showMsg("recMsg", "ההקלטה נעצרת — העלאה ל-Drive תימשך דקות אחדות.", true);
+          } else {
+            showMsg("recMsg", "העצירה נכשלה: " + ((r && r.error) || "?"), false);
+          }
+          loadRecord();
+        })
+        .withFailureHandler(function (e) {
+          btn.innerHTML = "⏹ עצור והעלה";
+          showMsg("recMsg", "שגיאה: " + e.message, false);
+        })
+        .stopRecording();
+    }
+
+    // טעינה ראשונית
+    loadServer();
+    loadRecord();
+    loadJobs();
+    // רענון אוטומטי כל 30 שניות
+    setInterval(function () { loadServer(); loadRecord(); }, 30000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+# מקטין את ה-build context - שום דבר מהרשימה הזו לא נדרש בתוך התמונה.
+# app.py, start.sh ו-requirements.txt מועתקים במפורש ב-Dockerfile.
+*
+!app.py
+!start.sh
+!requirements.txt
+!Dockerfile
+!telegram_bot.py
+!telegram_songs_to_drive.py
+!drive_bridge.py
