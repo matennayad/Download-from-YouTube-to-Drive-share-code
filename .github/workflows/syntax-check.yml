@@ -33,3 +33,8 @@ jobs:
           node --check /tmp/gscheck/Code.js
           node --check /tmp/gscheck/channels.js
           echo "Apps Script OK"
+
+      - name: guide.html is up to date
+        run: |
+          python3 tools/build-guide.py
+          git diff --exit-code guide.html || (echo "::error::guide.html לא מעודכן - הריצו python3 tools/build-guide.py" && exit 1)
