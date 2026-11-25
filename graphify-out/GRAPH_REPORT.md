@@ -1,17 +1,17 @@
 # Graph Report - download-from-youtube-to-drive-share-code  (2026-11-25)
 
 ## Corpus Check
-- 38 files · ~126,391 words
+- 40 files · ~126,651 words
 - Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 11 file(s) not represented in the graph (top: (none) 5, .gs 2, .bat 2)
+- Unclassified: 12 file(s) not represented in the graph (top: (none) 6, .gs 2, .bat 2)
 
 ## Summary
-- 941 nodes · 1714 edges · 54 communities (40 shown, 14 thin omitted)
+- 943 nodes · 1715 edges · 55 communities (40 shown, 15 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 28 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9de15ac5`
+- Built from commit: `9da5c69a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -70,13 +70,14 @@
 - PROMPT_FOR_AI.md
 - setup.sh
 - test.sh
+- CLAUDE.md
 
 ## God Nodes (most connected - your core abstractions)
 1. `send_message()` - 21 edges
-2. `download()` - 19 edges
-3. `handle_update()` - 19 edges
-4. `main_loop()` - 17 edges
-5. `buildEntry()` - 17 edges
+2. `handle_update()` - 19 edges
+3. `download()` - 19 edges
+4. `buildEntry()` - 17 edges
+5. `main_loop()` - 17 edges
 6. `kan_page_fetch()` - 16 edges
 7. `startChannelFlow()` - 16 edges
 8. `_extract_hidden_m3u8_once()` - 15 edges
@@ -88,17 +89,17 @@
   docs/UNIFIED_SEARCH_SETUP.md → apps-script/unified-search/קוד.js
 - `שלב 5 — טופס החיפוש המאוחד (מומלץ)` --references--> `checkGmailApi()`  [INFERRED]
   README.md → apps-script/unified-search/קוד.js
+- `מגבלות שחשוב להכיר` --references--> `cleanup_stale_jobs()`  [INFERRED]
+  docs/CHANNELS.md → download-service/app.py
+- `הפעלה (פעם אחת)` --references--> `openDashboard()`  [INFERRED]
+  docs/DASHBOARD_AND_EMAIL_COMMANDS.md → apps-script/unified-search/קוד.js
 - `פתרון בעיות` --references--> `checkGmailApi()`  [INFERRED]
-  docs/UNIFIED_SEARCH_SETUP.md → apps-script/unified-search/קוד.js
-- `שלב 3: אישור הרשאות והפעלה (~3 דקות)` --references--> `checkGmailApi()`  [INFERRED]
-  docs/UNIFIED_SEARCH_SETUP.md → apps-script/unified-search/קוד.js
-- `פתרון בעיות` --references--> `grantGmailScope()`  [INFERRED]
   docs/UNIFIED_SEARCH_SETUP.md → apps-script/unified-search/קוד.js
 
 ## Import Cycles
 - None detected.
 
-## Communities (54 total, 14 thin omitted)
+## Communities (55 total, 15 thin omitted)
 
 ### Community 0 - "telegram_bot.py"
 Cohesion: 0.05
@@ -261,7 +262,7 @@ Cohesion: 0.40
 Nodes (3): gemini_image_upload(), _get_or_create_gemini_folder(), upload_gemini_image()
 
 ## Knowledge Gaps
-- **14 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **15 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_

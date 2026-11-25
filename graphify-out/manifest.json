@@ -256,5 +256,17 @@
     "seen": 1795570085.732462,
     "ast_hash": "a198a513d22c03a84b2028beabfe7879",
     "semantic_hash": ""
+  },
+  ".claude/settings.json": {
+    "mtime": 1795570085.881208,
+    "seen": 1795570108.0840094,
+    "ast_hash": "8eafe95f2f857d090df6c04324b234d1",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1795570085.880959,
+    "seen": 1795570108.0841172,
+    "ast_hash": "dfe5fa7939121e96d61b54077cc9ab84",
+    "semantic_hash": ""
   }
 }
